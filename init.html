@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Program Generator</title>
+    <style>
+        :root {
+            --color-primary: #2180a8;
+            --color-primary-hover: #1a6a8a;
+            --color-secondary: #f0f4f8;
+            --color-text: #1f2124;
+            --color-text-secondary: #626c78;
+            --color-border: #e0e4e8;
+            --color-success: #22c55e;
+            --color-error: #ef4444;
+            --color-bg: #fafbfc;
+            --spacing-8: 8px;
+            --spacing-16: 16px;
+            --spacing-24: 24px;
+            --radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            background: white;
+        }
+
+        .sidebar {
+            width: 300px;
+            border-right: 1px solid var(--color-border);
+            padding: var(--spacing-16);
+            background: #f8f9fa;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-16);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .subject-input {
+            width: 100%;
+            padding: var(--spacing-8) var(--spacing-16);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            margin-bottom: var(--spacing-16);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+            margin-bottom: var(--spacing-16);
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-label {
+            display: block;
+            padding: var(--spacing-8) var(--spacing-16);
+            background: var(--color-secondary);
+            border: 1px dashed var(--color-primary);
+            border-radius: var(--radius);
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--color-primary);
+            transition: background 0.2s;
+        }
+
+        .file-label:hover {
+            background: #e8f1f8;
+        }
+
+        .file-list {
+            margin-bottom: var(--spacing-16);
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            background: var(--color-secondary);
+            padding: var(--spacing-8) var(--spacing-12);
+            margin-bottom: var(--spacing-8);
+            border-radius: var(--radius);
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .remove-file {
+            cursor: pointer;
+            color: var(--color-error);
+            font-weight: bold;
+            margin-left: var(--spacing-8);
+        }
+
+        .output-type-selector {
+            margin-bottom: var(--spacing-16);
+        }
+
+        .output-type-selector label {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--spacing-8);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .output-type-selector input[type="radio"] {
+            margin-right: var(--spacing-8);
+            cursor: pointer;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: var(--spacing-12) var(--spacing-16);
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: var(--spacing-16);
+        }
+
+        .btn-generate:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .history {
+            margin-top: auto;
+            padding-top: var(--spacing-16);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .history-item {
+            padding: var(--spacing-8);
+            margin-bottom: var(--spacing-8);
+            background: var(--color-secondary);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 13px;
+            text-align: left;
+            border: none;
+            width: 100%;
+            color: var(--color-text-secondary);
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            background: #d4dce5;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-24);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-16);
+        }
+
+        .message {
+            display: flex;
+            gap: var(--spacing-12);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: var(--spacing-12) var(--spacing-16);
+            border-radius: var(--radius);
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: var(--color-secondary);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .message.loading .message-content {
+            background: var(--color-secondary);
+        }
+
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
+        }
+
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            animation: bounce 1.4s infinite;
+        }
+
+        .loading-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { opacity: 0.3; }
+            40% { opacity: 1; }
+        }
+
+        .input-area {
+            padding: var(--spacing-16) var(--spacing-24);
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            gap: var(--spacing-12);
+        }
+
+        .input-field {
+            flex: 1;
+            padding: var(--spacing-12) var(--spacing-16);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            max-height: 100px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(33, 128, 168, 0.1);
+        }
+
+        .btn-send {
+            padding: var(--spacing-12) var(--spacing-16);
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-send:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-send:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: var(--spacing-16);
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: var(--spacing-8);
+        }
+
+        .empty-state-subtext {
+            font-size: 14px;
+        }
+
+        .error {
+            background: #fee;
+            color: var(--color-error);
+            padding: var(--spacing-12);
+            border-radius: var(--radius);
+            margin-bottom: var(--spacing-12);
+            border: 1px solid #fcc;
+        }
+
+        .success {
+            background: #efe;
+            color: var(--color-success);
+            padding: var(--spacing-12);
+            border-radius: var(--radius);
+            margin-bottom: var(--spacing-12);
+            border: 1px solid #cfc;
+        }
+
+        .format-buttons {
+            display: flex;
+            gap: var(--spacing-8);
+            margin-bottom: var(--spacing-16);
+        }
+
+        .format-btn {
+            padding: var(--spacing-8) var(--spacing-12);
+            background: var(--color-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .format-btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .format-btn.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--color-border);
+                max-height: 200px;
+            }
+
+            .chat-area {
+                height: 100%;
+            }
+
+            .message-content {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-title">📚 Предмет обучения</div>
+            <input 
+                type="text" 
+                id="subjectInput" 
+                class="subject-input" 
+                placeholder="Введите предмет (например: Python, История)"
+            >
+
+            <div class="sidebar-title">📎 Загрузить материалы</div>
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" accept=".txt,.pdf,.md" multiple>
+                <label for="fileInput" class="file-label">Нажмите для загрузки файла</label>
+            </div>
+
+            <div id="fileList" class="file-list"></div>
+
+            <div class="sidebar-title">📋 Формат ответа</div>
+            <div class="output-type-selector">
+                <label>
+                    <input type="radio" name="outputType" value="summary" checked>
+                    Конспект
+                </label>
+                <label>
+                    <input type="radio" name="outputType" value="flashcards">
+                    Карточки для запоминания
+                </label>
+                <label>
+                    <input type="radio" name="outputType" value="test">
+                    Тесты
+                </label>
+            </div>
+
+            <button id="generateBtn" class="btn-generate">📝 Создать программу обучения</button>
+
+            <div class="history">
+                <div class="sidebar-title">📜 История</div>
+                <div id="historyList"></div>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <div id="messages" class="messages">
+                <div class="empty-state">
+                    <div class="empty-state-icon">💡</div>
+                    <div class="empty-state-text">Начнём обучение?</div>
+                    <div class="empty-state-subtext">Выберите предмет и формат ответа в левой панели</div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <textarea 
+                    id="userInput" 
+                    class="input-field" 
+                    placeholder="Задайте вопрос или попросите расширить материал..."
+                    rows="1"
+                ></textarea>
+                <button id="sendBtn" class="btn-send">Отправить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let chatHistory = [];
+        let uploadedFiles = [];
+        let messageHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+
+        const elements = {
+            subjectInput: document.getElementById('subjectInput'),
+            fileInput: document.getElementById('fileInput'),
+            fileList: document.getElementById('fileList'),
+            generateBtn: document.getElementById('generateBtn'),
+            messages: document.getElementById('messages'),
+            userInput: document.getElementById('userInput'),
+            sendBtn: document.getElementById('sendBtn'),
+            historyList: document.getElementById('historyList')
+        };
+
+        // Auto-resize textarea
+        elements.userInput.addEventListener('input', () => {
+            elements.userInput.style.height = 'auto';
+            elements.userInput.style.height = Math.min(elements.userInput.scrollHeight, 100) + 'px';
+        });
+
+        // File handling
+        elements.fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    uploadedFiles.push({
+                        name: file.name,
+                        content: event.target.result
+                    });
+                    updateFileList();
+                };
+                reader.readAsText(file);
+            });
+        });
+
+        function updateFileList() {
+            elements.fileList.innerHTML = uploadedFiles.map((file, idx) => `
+                <div class="file-item">
+                    <span>📄 ${file.name.substring(0, 20)}</span>
+                    <span class="remove-file" onclick="removeFile(${idx})">✕</span>
+                </div>
+            `).join('');
+        }
+
+        function removeFile(idx) {
+            uploadedFiles.splice(idx, 1);
+            updateFileList();
+        }
+
+        // Message rendering
+        function renderMessage(content, isUser = true) {
+            const messagesDiv = elements.messages;
+            
+            if (messagesDiv.querySelector('.empty-state')) {
+                messagesDiv.innerHTML = '';
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            messageDiv.innerHTML = `<div class="message-content">${escapeHtml(content)}</div>`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function renderLoadingMessage() {
+            const messagesDiv = elements.messages;
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message loading assistant';
+            messageDiv.id = 'loadingMessage';
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <div class="loading-dots">
+                        <div class="loading-dot"></div>
+                        <div class="loading-dot"></div>
+                        <div class="loading-dot"></div>
+                    </div>
+                </div>
+            `;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function removeLoadingMessage() {
+            const loading = document.getElementById('loadingMessage');
+            if (loading) loading.remove();
+        }
+
+        // API calls to Hugging Face Inference API
+        async function callAI(prompt) {
+            try {
+                const response = await fetch('https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        inputs: prompt,
+                        parameters: {
+                            max_new_tokens: 1024,
+                            temperature: 0.7
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data[0].generated_text.substring(prompt.length).trim();
+            } catch (error) {
+                console.error('API Error:', error);
+                return `❌ Ошибка подключения к ИИ: ${error.message}. Попробуйте позже или перезагрузите страницу.`;
+            }
+        }
+
+        // Generate learning program
+        elements.generateBtn.addEventListener('click', async () => {
+            const subject = elements.subjectInput.value.trim();
+            if (!subject) {
+                alert('Пожалуйста, введите предмет обучения');
+                return;
+            }
+
+            const outputType = document.querySelector('input[name="outputType"]:checked').value;
+            elements.messages.innerHTML = '';
+
+            renderMessage(`Создаю программу обучения по "${subject}" в формате "${getFormatName(outputType)}"...`, true);
+            renderLoadingMessage();
+
+            let filesContext = '';
+            if (uploadedFiles.length > 0) {
+                filesContext = `\n\nЗагруженные материалы:\n${uploadedFiles.map(f => `- ${f.name}: ${f.content.substring(0, 200)}...`).join('\n')}`;
+            }
+
+            const prompts = {
+                summary: `Создай подробный конспект для обучения по предмету "${subject}". Структурируй информацию с главными темами, ключевыми понятиями и примерами. Язык: русский.${filesContext}`,
+                flashcards: `Создай набор карточек для запоминания (в формате "Вопрос | Ответ") по предмету "${subject}". Включи 10-15 карточек с ключевыми терминами и определениями. Язык: русский.${filesContext}`,
+                test: `Создай тест с 5 вопросами и вариантами ответов по предмету "${subject}". Язык: русский.${filesContext}`
+            };
+
+            const response = await callAI(prompts[outputType]);
+            removeLoadingMessage();
+            renderMessage(response, false);
+
+            chatHistory.push({
+                subject: subject,
+                outputType: outputType,
+                timestamp: new Date().toLocaleString('ru-RU'),
+                response: response
+            });
+
+            updateHistory();
+        });
+
+        // Send message
+        async function sendMessage() {
+            const message = elements.userInput.value.trim();
+            if (!message || !elements.sendBtn.disabled === false) return;
+
+            renderMessage(message, true);
+            elements.userInput.value = '';
+            elements.userInput.style.height = 'auto';
+
+            const subject = elements.subjectInput.value || 'изучаемый материал';
+            const outputType = document.querySelector('input[name="outputType"]:checked').value;
+
+            renderLoadingMessage();
+
+            const prompt = `На основе предмета "${subject}" (формат: ${getFormatName(outputType)}): ${message}`;
+            const response = await callAI(prompt);
+
+            removeLoadingMessage();
+            renderMessage(response, false);
+
+            chatHistory.push({
+                subject: subject,
+                message: message,
+                response: response,
+                timestamp: new Date().toLocaleString('ru-RU')
+            });
+        }
+
+        elements.sendBtn.addEventListener('click', sendMessage);
+        elements.userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // History
+        function updateHistory() {
+            const historyItems = chatHistory.slice(-5).reverse();
+            elements.historyList.innerHTML = historyItems.map((item, idx) => `
+                <button class="history-item" onclick="loadFromHistory(${chatHistory.length - idx - 1})">
+                    ${item.subject || item.message.substring(0, 20)}...
+                </button>
+            `).join('');
+        }
+
+        function loadFromHistory(idx) {
+            const item = chatHistory[idx];
+            elements.subjectInput.value = item.subject || '';
+            elements.messages.innerHTML = '';
+            renderMessage(item.message || `Программа по ${item.subject}`, true);
+            renderMessage(item.response, false);
+        }
+
+        function getFormatName(type) {
+            const names = {
+                summary: 'Конспект',
+                flashcards: 'Карточки',
+                test: 'Тест'
+            };
+            return names[type];
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        updateHistory();
+    </script>
+</body>
+</html>
