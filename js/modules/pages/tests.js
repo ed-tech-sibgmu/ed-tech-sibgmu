@@ -644,7 +644,7 @@ export class TestsPage {
         `;
 
         try {
-            const apiKey = '"${secrets.HUGGING_FACE_TOKEN}"';
+            const apiKey = '${secrets.HUGGING_FACE_TOKEN}';
             if (!apiKey) {
                 throw new Error('Не указан API ключ Gemini. Добавьте его в настройках.');
             }
@@ -681,7 +681,7 @@ export class TestsPage {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-            		Authorization: `Bearer "${secrets.HUGGING_FACE_TOKEN}"`,
+            		Authorization: 'Bearer ${secrets.HUGGING_FACE_TOKEN}',
                 },
                 body: JSON.stringify({"messages":[{"role":"user","content":prompt}],"model":"deepseek-ai/DeepSeek-V3.2"})
             }

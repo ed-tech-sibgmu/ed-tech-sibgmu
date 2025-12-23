@@ -902,7 +902,7 @@ export class NotesPage {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-            	Authorization: `Bearer "${secrets.HUGGING_FACE_TOKEN}"`,
+            	Authorization: 'Bearer ${secrets.HUGGING_FACE_TOKEN}',
             },
             body: JSON.stringify({
                 "system": systemPrompt,
