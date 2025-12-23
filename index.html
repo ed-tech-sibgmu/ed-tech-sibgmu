@@ -1,75 +1,293 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="light" data-accent="violet">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learning Program Generator</title>
-    <link rel="stylesheet" href="src/styles.css">
+    <title>EduGen — Персонализированная подготовка</title>
+
+    <!-- Шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- KaTeX для LaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <!-- Marked для Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Стили -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/animations.css">
 </head>
+
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <div class="sidebar-title">📚 Предмет обучения</div>
-            <input 
-                type="text" 
-                id="subjectInput" 
-                class="subject-input" 
-                placeholder="Введите предмет (например: Python, История)"
-            >
-
-            <div class="sidebar-title">📎 Загрузить материалы</div>
-            <div class="file-input-wrapper">
-                <input type="file" id="fileInput" accept=".txt,.pdf,.md" multiple>
-                <label for="fileInput" class="file-label">Нажмите для загрузки файла</label>
+    <!-- Загрузочный экран -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <i data-lucide="graduation-cap" class="splash-icon"></i>
             </div>
-
-            <div id="fileList" class="file-list"></div>
-
-            <div class="sidebar-title">📋 Формат ответа</div>
-            <div class="output-type-selector">
-                <label>
-                    <input type="radio" name="outputType" value="summary" checked>
-                    Конспект
-                </label>
-                <label>
-                    <input type="radio" name="outputType" value="flashcards">
-                    Карточки для запоминания
-                </label>
-                <label>
-                    <input type="radio" name="outputType" value="test">
-                    Тесты
-                </label>
-            </div>
-
-            <button id="generateBtn" class="btn-generate">📝 Создать программу обучения</button>
-
-            <div class="history">
-                <div class="sidebar-title">📜 История</div>
-                <div id="historyList"></div>
-            </div>
-        </div>
-
-        <div class="chat-area">
-            <div id="messages" class="messages">
-                <div class="empty-state">
-                    <div class="empty-state-icon">💡</div>
-                    <div class="empty-state-text">Начнём обучение?</div>
-                    <div class="empty-state-subtext">Выберите предмет и формат ответа в левой панели</div>
-                </div>
-            </div>
-
-            <div class="input-area">
-                <textarea 
-                    id="userInput" 
-                    class="input-field" 
-                    placeholder="Задайте вопрос или попросите расширить материал..."
-                    rows="1"
-                ></textarea>
-                <button id="sendBtn" class="btn-send">Отправить</button>
+            <h1 class="splash-title">EduGen</h1>
+            <p class="splash-subtitle">Персонализированная подготовка</p>
+            <div class="splash-loader">
+                <div class="loader-bar"></div>
             </div>
         </div>
     </div>
 
-    <script src="src/script.js"></script>
+    <!-- Основной контейнер приложения -->
+    <div id="app" class="app-container" style="display: none;">
+
+        <!-- Боковая навигация -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i data-lucide="graduation-cap"></i>
+                    <span>EduGen</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-page="home">
+                    <i data-lucide="home"></i>
+                    <span>Главная</span>
+                </button>
+                <button class="nav-item" data-page="notes">
+                    <i data-lucide="file-text"></i>
+                    <span>Конспекты</span>
+                </button>
+                <button class="nav-item" data-page="cards">
+                    <i data-lucide="layers"></i>
+                    <span>Карточки</span>
+                </button>
+                <button class="nav-item" data-page="tests">
+                    <i data-lucide="check-square"></i>
+                    <span>Тесты</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="nav-item" id="settings-btn">
+                    <i data-lucide="settings"></i>
+                    <span>Настройки</span>
+                </button>
+                <button class="nav-item" id="profile-btn">
+                    <i data-lucide="user"></i>
+                    <span>Профиль</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Основной контент -->
+        <main class="main-content" id="main-content">
+            <!-- Страницы будут загружаться динамически -->
+        </main>
+    </div>
+
+    <!-- Модальные окна -->
+    <!-- Онбординг -->
+    <div id="onboarding-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container onboarding-modal">
+            <div class="modal-header">
+                <div class="modal-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="onboarding-progress"></div>
+                    </div>
+                    <span class="progress-text" id="onboarding-step-text">Шаг 1 из 5</span>
+                </div>
+            </div>
+            <div class="modal-body" id="onboarding-content">
+                <!-- Контент шагов онбординга -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="onboarding-back" style="display: none;">
+                    <i data-lucide="arrow-left"></i>
+                    Назад
+                </button>
+                <button class="btn btn-primary" id="onboarding-next">
+                    Далее
+                    <i data-lucide="arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Загрузка материалов -->
+    <div id="materials-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i data-lucide="upload-cloud"></i>
+                    Загрузка материалов
+                </h2>
+                <button class="modal-close" id="materials-close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">
+                    Загрузите учебные материалы, на которые ИИ будет опираться при генерации контента.
+                    Это могут быть конспекты, учебники, списки экзаменационных вопросов.
+                </p>
+                <div class="upload-zone" id="upload-zone">
+                    <i data-lucide="file-plus" class="upload-icon"></i>
+                    <p class="upload-text">Перетащите файлы сюда</p>
+                    <p class="upload-subtext">или нажмите для выбора</p>
+                    <input type="file" id="file-input" multiple accept=".pdf,.txt,.md,.docx" hidden>
+                </div>
+                <div class="uploaded-files" id="uploaded-files"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="materials-skip">Пропустить</button>
+                <button class="btn btn-primary" id="materials-done">Готово</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Настройки -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container settings-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i data-lucide="settings"></i>
+                    Настройки
+                </h2>
+                <button class="modal-close" id="settings-close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Тема -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title">Тема оформления</h3>
+                    <div class="theme-selector">
+                        <button class="theme-option" data-theme="light">
+                            <i data-lucide="sun"></i>
+                            <span>Светлая</span>
+                        </button>
+                        <button class="theme-option" data-theme="dark">
+                            <i data-lucide="moon"></i>
+                            <span>Тёмная</span>
+                        </button>
+                        <button class="theme-option" data-theme="system">
+                            <i data-lucide="monitor"></i>
+                            <span>Системная</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Акцентный цвет -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title">Акцентный цвет</h3>
+                    <div class="accent-selector">
+                        <button class="accent-option" data-accent="violet" style="--accent-preview: #7C4DFF;"></button>
+                        <button class="accent-option" data-accent="teal" style="--accent-preview: #00BFA5;"></button>
+                        <button class="accent-option" data-accent="blue" style="--accent-preview: #2979FF;"></button>
+                        <button class="accent-option" data-accent="orange" style="--accent-preview: #FF9100;"></button>
+                        <button class="accent-option" data-accent="pink" style="--accent-preview: #FF4081;"></button>
+                        <button class="accent-option" data-accent="coral" style="--accent-preview: #FF6B6B;"></button>
+                        <button class="accent-option" data-accent="gold" style="--accent-preview: #FFD54F;"></button>
+                        <button class="accent-option" data-accent="lime" style="--accent-preview: #76FF03;"></button>
+                    </div>
+                </div>
+
+                <!-- API ключи (демо) -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title">API ключи</h3>
+                    <p class="settings-description">Для генерации контента с помощью ИИ</p>
+                    <div class="input-group">
+                        <label>Anthropic API Key</label>
+                        <div class="input-with-icon">
+                            <input type="password" id="anthropic-key" placeholder="sk-ant-...">
+                            <button class="input-toggle" data-toggle="anthropic-key">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Google AI API Key (Gemini)</label>
+                        <div class="input-with-icon">
+                            <input type="password" id="gemini-key" placeholder="AI...">
+                            <button class="input-toggle" data-toggle="gemini-key">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Учебные материалы -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title">Учебные материалы</h3>
+                    <p class="settings-description">Загрузите материалы для генерации контента</p>
+                    <div class="settings-buttons">
+                        <button class="btn btn-outline" id="settings-upload-materials">
+                            <i data-lucide="upload-cloud"></i>
+                            Загрузить материалы
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Данные -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title">Данные</h3>
+                    <div class="settings-buttons">
+                        <button class="btn btn-outline" id="export-data">
+                            <i data-lucide="download"></i>
+                            Экспорт данных
+                        </button>
+                        <button class="btn btn-outline" id="import-data">
+                            <i data-lucide="upload"></i>
+                            Импорт данных
+                        </button>
+                        <button class="btn btn-danger-outline" id="reset-data">
+                            <i data-lucide="trash-2"></i>
+                            Сбросить всё
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Диалог подтверждения -->
+    <div id="confirm-dialog" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container modal-small">
+            <div class="modal-body">
+                <div class="confirm-icon" id="confirm-icon">
+                    <i data-lucide="alert-triangle"></i>
+                </div>
+                <h3 class="confirm-title" id="confirm-title">Подтверждение</h3>
+                <p class="confirm-message" id="confirm-message">Вы уверены?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="confirm-cancel">Отмена</button>
+                <button class="btn btn-danger" id="confirm-ok">Подтвердить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Скрипты -->
+    <script type="module" src="js/app.js"></script>
 </body>
+
 </html>

@@ -1,0 +1,337 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   EduGen — CSS Variables
+   Темы, акцентные цвета, типографика
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    /* ═══ Типографика ═══ */
+    --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    
+    /* Размеры шрифтов */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+    --text-4xl: 2.25rem;
+    
+    /* Веса шрифтов */
+    --font-light: 300;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    
+    /* ═══ Spacing ═══ */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
+    
+    /* ═══ Border Radius ═══ */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+    
+    /* ═══ Shadows ═══ */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* ═══ Transitions ═══ */
+    --transition-fast: 150ms ease;
+    --transition-base: 200ms ease;
+    --transition-slow: 300ms ease;
+    --transition-spring: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    /* ═══ Z-Index ═══ */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-modal-backdrop: 300;
+    --z-modal: 400;
+    --z-toast: 500;
+    --z-splash: 1000;
+    
+    /* ═══ Sidebar ═══ */
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 72px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   LIGHT THEME — Soft White
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+[data-theme="light"] {
+    /* Surfaces */
+    --color-bg: #FAFAFC;
+    --color-surface: #FCFCFE;
+    --color-surface-variant: #F4F4F8;
+    --color-surface-container: #F8F8FB;
+    --color-surface-container-high: #EFEFF3;
+    --color-surface-container-highest: #E8E8ED;
+    
+    /* Borders */
+    --color-outline: #D0D0D8;
+    --color-outline-variant: #E0E0E6;
+    
+    /* Text */
+    --color-text: #1A1A1F;
+    --color-text-secondary: #5A5A65;
+    --color-text-tertiary: #8A8A95;
+    
+    /* Semantic */
+    --color-success: #22C55E;
+    --color-success-container: #DCFCE7;
+    --color-warning: #F59E0B;
+    --color-warning-container: #FEF3C7;
+    --color-error: #EF4444;
+    --color-error-container: #FEE2E2;
+    --color-info: #3B82F6;
+    --color-info-container: #DBEAFE;
+    
+    /* Cards */
+    --color-card: #FFFFFF;
+    --color-card-border: #E8E8ED;
+    
+    /* Modal */
+    --modal-backdrop: rgba(0, 0, 0, 0.4);
+    
+    /* Shadows for light theme */
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   DARK THEME — Deep Space
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+    /* Surfaces */
+    --color-bg: #050508;
+    --color-surface: #0A0A0F;
+    --color-surface-variant: #15151A;
+    --color-surface-container: #101015;
+    --color-surface-container-high: #1A1A20;
+    --color-surface-container-highest: #24242A;
+    
+    /* Borders */
+    --color-outline: #2F2F35;
+    --color-outline-variant: #202026;
+    
+    /* Text */
+    --color-text: #E8E8EC;
+    --color-text-secondary: #9999A5;
+    --color-text-tertiary: #6A6A75;
+    
+    /* Semantic */
+    --color-success: #4ADE80;
+    --color-success-container: #14532D;
+    --color-warning: #FBBF24;
+    --color-warning-container: #713F12;
+    --color-error: #F87171;
+    --color-error-container: #7F1D1D;
+    --color-info: #60A5FA;
+    --color-info-container: #1E3A5F;
+    
+    /* Cards */
+    --color-card: #18181D;
+    --color-card-border: #2A2A30;
+    
+    /* Modal */
+    --modal-backdrop: rgba(0, 0, 0, 0.7);
+    
+    /* Shadows for dark theme */
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ACCENT COLORS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Violet (Default) */
+[data-accent="violet"] {
+    --color-primary: #7C4DFF;
+    --color-primary-hover: #651FFF;
+    --color-primary-container: rgba(124, 77, 255, 0.12);
+    --color-primary-container-hover: rgba(124, 77, 255, 0.2);
+    --color-on-primary: #FFFFFF;
+}
+[data-theme="dark"][data-accent="violet"] {
+    --color-primary: #9E7CFF;
+    --color-primary-hover: #B49FFF;
+    --color-primary-container: rgba(158, 124, 255, 0.2);
+}
+
+/* Teal */
+[data-accent="teal"] {
+    --color-primary: #00BFA5;
+    --color-primary-hover: #00A896;
+    --color-primary-container: rgba(0, 191, 165, 0.12);
+    --color-primary-container-hover: rgba(0, 191, 165, 0.2);
+    --color-on-primary: #FFFFFF;
+}
+[data-theme="dark"][data-accent="teal"] {
+    --color-primary: #64FFDA;
+    --color-primary-hover: #7FFFDF;
+    --color-primary-container: rgba(100, 255, 218, 0.2);
+}
+
+/* Blue */
+[data-accent="blue"] {
+    --color-primary: #2979FF;
+    --color-primary-hover: #2962FF;
+    --color-primary-container: rgba(41, 121, 255, 0.12);
+    --color-primary-container-hover: rgba(41, 121, 255, 0.2);
+    --color-on-primary: #FFFFFF;
+}
+[data-theme="dark"][data-accent="blue"] {
+    --color-primary: #69A6FF;
+    --color-primary-hover: #82B5FF;
+    --color-primary-container: rgba(105, 166, 255, 0.2);
+}
+
+/* Orange */
+[data-accent="orange"] {
+    --color-primary: #FF9100;
+    --color-primary-hover: #FF6D00;
+    --color-primary-container: rgba(255, 145, 0, 0.12);
+    --color-primary-container-hover: rgba(255, 145, 0, 0.2);
+    --color-on-primary: #FFFFFF;
+}
+[data-theme="dark"][data-accent="orange"] {
+    --color-primary: #FFAB40;
+    --color-primary-hover: #FFBD60;
+    --color-primary-container: rgba(255, 171, 64, 0.2);
+}
+
+/* Pink */
+[data-accent="pink"] {
+    --color-primary: #FF4081;
+    --color-primary-hover: #F50057;
+    --color-primary-container: rgba(255, 64, 129, 0.12);
+    --color-primary-container-hover: rgba(255, 64, 129, 0.2);
+    --color-on-primary: #FFFFFF;
+}
+[data-theme="dark"][data-accent="pink"] {
+    --color-primary: #FF80AB;
+    --color-primary-hover: #FF99BC;
+    --color-primary-container: rgba(255, 128, 171, 0.2);
+}
+
+/* Coral */
+[data-accent="coral"] {
+    --color-primary: #FF6B6B;
+    --color-primary-hover: #FF5252;
+    --color-primary-container: rgba(255, 107, 107, 0.12);
+    --color-primary-container-hover: rgba(255, 107, 107, 0.2);
+    --color-on-primary: #FFFFFF;
+}
+[data-theme="dark"][data-accent="coral"] {
+    --color-primary: #FF8A8A;
+    --color-primary-hover: #FFA0A0;
+    --color-primary-container: rgba(255, 138, 138, 0.2);
+}
+
+/* Gold */
+[data-accent="gold"] {
+    --color-primary: #FFD54F;
+    --color-primary-hover: #FFC107;
+    --color-primary-container: rgba(255, 213, 79, 0.15);
+    --color-primary-container-hover: rgba(255, 213, 79, 0.25);
+    --color-on-primary: #1A1A1F;
+}
+[data-theme="dark"][data-accent="gold"] {
+    --color-primary: #FFE082;
+    --color-primary-hover: #FFE89F;
+    --color-primary-container: rgba(255, 224, 130, 0.2);
+    --color-on-primary: #1A1A1F;
+}
+
+/* Lime */
+[data-accent="lime"] {
+    --color-primary: #76FF03;
+    --color-primary-hover: #64DD17;
+    --color-primary-container: rgba(118, 255, 3, 0.12);
+    --color-primary-container-hover: rgba(118, 255, 3, 0.2);
+    --color-on-primary: #1A1A1F;
+}
+[data-theme="dark"][data-accent="lime"] {
+    --color-primary: #B2FF59;
+    --color-primary-hover: #C5FF7A;
+    --color-primary-container: rgba(178, 255, 89, 0.2);
+    --color-on-primary: #1A1A1F;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   RATING BUTTON COLORS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    --color-again: #EF5350;
+    --color-hard: #78909C;
+    --color-good: #66BB6A;
+    --color-easy: #42A5F5;
+}
+
+[data-theme="light"] {
+    --color-again-container: #FFEBEE;
+    --color-hard-container: #F5F5F5;
+    --color-good-container: #E8F5E9;
+    --color-easy-container: #E3F2FD;
+}
+
+[data-theme="dark"] {
+    --color-again-container: #3D2020;
+    --color-hard-container: #2A2D30;
+    --color-good-container: #1B3D1F;
+    --color-easy-container: #1A2F3D;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   CARD STATUS COLORS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+[data-theme="light"] {
+    --color-new: #2196F3;
+    --color-learning: #FF9800;
+    --color-review: #4CAF50;
+    --color-mastered: #00C853;
+}
+
+[data-theme="dark"] {
+    --color-new: #64B5F6;
+    --color-learning: #FFB74D;
+    --color-review: #81C784;
+    --color-mastered: #69F0AE;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FOLDER PRESET COLORS
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    --folder-violet: #7C4DFF;
+    --folder-teal: #00BFA5;
+    --folder-blue: #2979FF;
+    --folder-orange: #FF9100;
+    --folder-pink: #FF4081;
+    --folder-green: #00E676;
+    --folder-yellow: #FFD54F;
+    --folder-coral: #FF6B6B;
+}
