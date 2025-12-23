@@ -71,103 +71,85 @@ export class HomePage {
                     </div>
                 </div>
                 
-                <!-- Модули -->
-                <section class="modules-section">
-                    <h2 class="section-title">Модули обучения</h2>
-                    <div class="modules-grid">
-                        <!-- Конспекты -->
-                        <article class="module-card notes" data-module="notes">
-                            <div class="module-icon">
-                                <i data-lucide="book-open"></i>
-                            </div>
-                            <div class="module-content">
-                                <h3 class="module-title">Конспекты</h3>
-                                <p class="module-description">
-                                    Структурированные заметки с поддержкой Markdown и LaTeX. 
-                                    Организуйте знания в удобную файловую систему.
-                                </p>
-                                <div class="module-features">
-                                    <span class="feature-tag"><i data-lucide="file-text"></i> Markdown</span>
-                                    <span class="feature-tag"><i data-lucide="sigma"></i> LaTeX</span>
-                                    <span class="feature-tag"><i data-lucide="folder-tree"></i> Папки</span>
+                <!-- Основной контент: модули + история -->
+                <div class="home-content">
+                    <!-- Модули -->
+                    <section class="modules-section">
+                        <h2 class="section-title">Модули обучения</h2>
+                        <div class="modules-grid">
+                            <!-- Конспекты -->
+                            <article class="module-card notes" data-module="notes">
+                                <div class="module-icon">
+                                    <i data-lucide="book-open"></i>
                                 </div>
-                            </div>
-                            <div class="module-action">
-                                <i data-lucide="arrow-right"></i>
-                            </div>
-                        </article>
-                        
-                        <!-- Карточки -->
-                        <article class="module-card cards" data-module="cards">
-                            <div class="module-icon">
-                                <i data-lucide="layers"></i>
-                            </div>
-                            <div class="module-content">
-                                <h3 class="module-title">Карточки</h3>
-                                <p class="module-description">
-                                    Интервальное повторение с алгоритмом FSRS. 
-                                    Запоминайте эффективно с научным подходом.
-                                </p>
-                                <div class="module-features">
-                                    <span class="feature-tag"><i data-lucide="brain"></i> FSRS</span>
-                                    <span class="feature-tag"><i data-lucide="image"></i> Медиа</span>
-                                    <span class="feature-tag"><i data-lucide="bar-chart-2"></i> Статистика</span>
+                                <div class="module-content">
+                                    <h3 class="module-title">Конспекты</h3>
+                                    <p class="module-description">
+                                        Структурированные заметки с поддержкой Markdown и LaTeX. 
+                                        Организуйте знания в удобную файловую систему.
+                                    </p>
+                                    <div class="module-features">
+                                        <span class="feature-tag"><i data-lucide="file-text"></i> Markdown</span>
+                                        <span class="feature-tag"><i data-lucide="sigma"></i> LaTeX</span>
+                                        <span class="feature-tag"><i data-lucide="folder-tree"></i> Папки</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="module-action">
-                                <i data-lucide="arrow-right"></i>
-                            </div>
-                        </article>
-                        
-                        <!-- Тесты -->
-                        <article class="module-card tests" data-module="tests">
-                            <div class="module-icon">
-                                <i data-lucide="clipboard-check"></i>
-                            </div>
-                            <div class="module-content">
-                                <h3 class="module-title">Тесты</h3>
-                                <p class="module-description">
-                                    Проверьте свои знания с помощью разнообразных типов вопросов. 
-                                    Отслеживайте прогресс и находите слабые места.
-                                </p>
-                                <div class="module-features">
-                                    <span class="feature-tag"><i data-lucide="list-checks"></i> Выбор</span>
-                                    <span class="feature-tag"><i data-lucide="link"></i> Соответствие</span>
-                                    <span class="feature-tag"><i data-lucide="pen-tool"></i> Открытые</span>
+                                <div class="module-action">
+                                    <i data-lucide="arrow-right"></i>
                                 </div>
-                            </div>
-                            <div class="module-action">
-                                <i data-lucide="arrow-right"></i>
-                            </div>
-                        </article>
-                    </div>
-                </section>
-                
-                <!-- Быстрые действия -->
-                <section class="quick-actions-section">
-                    <h2 class="section-title">Быстрые действия</h2>
-                    <div class="quick-actions">
-                        <button class="quick-action-btn" id="generate-notes">
-                            <i data-lucide="sparkles"></i>
-                            <span>Сгенерировать конспект</span>
-                        </button>
-                        <button class="quick-action-btn" id="generate-cards">
-                            <i data-lucide="wand-2"></i>
-                            <span>Создать карточки</span>
-                        </button>
-                        <button class="quick-action-btn" id="generate-test">
-                            <i data-lucide="zap"></i>
-                            <span>Создать тест</span>
-                        </button>
-                        <button class="quick-action-btn" id="upload-materials">
-                            <i data-lucide="upload"></i>
-                            <span>Загрузить материалы</span>
-                        </button>
-                    </div>
-                </section>
-                
-                <!-- Недавняя активность -->
-                ${this.renderRecentActivity()}
+                            </article>
+                            
+                            <!-- Карточки -->
+                            <article class="module-card cards" data-module="cards">
+                                <div class="module-icon">
+                                    <i data-lucide="layers"></i>
+                                </div>
+                                <div class="module-content">
+                                    <h3 class="module-title">Карточки</h3>
+                                    <p class="module-description">
+                                        Интервальное повторение с алгоритмом FSRS. 
+                                        Запоминайте эффективно с научным подходом.
+                                    </p>
+                                    <div class="module-features">
+                                        <span class="feature-tag"><i data-lucide="brain"></i> FSRS</span>
+                                        <span class="feature-tag"><i data-lucide="image"></i> Медиа</span>
+                                        <span class="feature-tag"><i data-lucide="bar-chart-2"></i> Статистика</span>
+                                    </div>
+                                </div>
+                                <div class="module-action">
+                                    <i data-lucide="arrow-right"></i>
+                                </div>
+                            </article>
+                            
+                            <!-- Тесты -->
+                            <article class="module-card tests" data-module="tests">
+                                <div class="module-icon">
+                                    <i data-lucide="clipboard-check"></i>
+                                </div>
+                                <div class="module-content">
+                                    <h3 class="module-title">Тесты</h3>
+                                    <p class="module-description">
+                                        Проверьте свои знания с помощью разнообразных типов вопросов. 
+                                        Отслеживайте прогресс и находите слабые места.
+                                    </p>
+                                    <div class="module-features">
+                                        <span class="feature-tag"><i data-lucide="list-checks"></i> Выбор</span>
+                                        <span class="feature-tag"><i data-lucide="link"></i> Соответствие</span>
+                                        <span class="feature-tag"><i data-lucide="pen-tool"></i> Открытые</span>
+                                    </div>
+                                </div>
+                                <div class="module-action">
+                                    <i data-lucide="arrow-right"></i>
+                                </div>
+                            </article>
+                        </div>
+                    </section>
+                    
+                    <!-- История (для больших экранов) -->
+                    <aside class="history-sidebar">
+                        ${this.renderRecentActivity()}
+                    </aside>
+                </div>
             </div>
         `;
         
@@ -247,35 +229,6 @@ export class HomePage {
                 const module = card.dataset.module;
                 this.app.navigateTo(module);
             });
-        });
-        
-        // Быстрые действия
-        container.querySelector('#generate-notes')?.addEventListener('click', () => {
-            this.app.navigateTo('notes');
-            setTimeout(() => {
-                const generateBtn = document.getElementById('generate-note-btn');
-                if (generateBtn) generateBtn.click();
-            }, 100);
-        });
-        
-        container.querySelector('#generate-cards')?.addEventListener('click', () => {
-            this.app.navigateTo('cards');
-            setTimeout(() => {
-                const generateBtn = document.getElementById('generate-deck-btn');
-                if (generateBtn) generateBtn.click();
-            }, 100);
-        });
-        
-        container.querySelector('#generate-test')?.addEventListener('click', () => {
-            this.app.navigateTo('tests');
-            setTimeout(() => {
-                const generateBtn = document.getElementById('create-test-btn');
-                if (generateBtn) generateBtn.click();
-            }, 100);
-        });
-        
-        container.querySelector('#upload-materials')?.addEventListener('click', () => {
-            this.app.modal.open('materials-modal');
         });
         
         // Профиль

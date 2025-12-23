@@ -170,6 +170,12 @@ class App {
             this.storage.set('gemini_api_key', e.target.value);
         });
         
+        // Загрузка материалов из настроек
+        document.getElementById('settings-upload-materials').addEventListener('click', () => {
+            this.modal.close('settings-modal');
+            this.modal.open('materials-modal');
+        });
+        
         // Экспорт данных
         document.getElementById('export-data').addEventListener('click', () => {
             this.exportData();

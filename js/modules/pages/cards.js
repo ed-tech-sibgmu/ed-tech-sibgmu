@@ -32,43 +32,35 @@ export class CardsPage {
         
         return `
             <div class="page cards-page">
-                <header class="page-header">
-                    <div class="header-content">
-                        <h1 class="page-title">Карточки</h1>
-                        <p class="page-subtitle">Интервальное повторение с алгоритмом FSRS</p>
+                <!-- Основная область (слева) -->
+                <main class="cards-main">
+                    ${this.currentDeck 
+                        ? this.renderDeckContent()
+                        : this.renderCardsWelcome()}
+                </main>
+                
+                <!-- Сайдбар с колодами (справа) -->
+                <aside class="decks-sidebar">
+                    <div class="sidebar-header">
+                        <h2>Колоды</h2>
+                        <div class="sidebar-actions">
+                            <button class="btn-icon" id="create-deck-btn" title="Новая колода">
+                                <i data-lucide="plus"></i>
+                            </button>
+                        </div>
                     </div>
-                    <button class="btn btn-primary" id="create-deck-btn">
-                        <i data-lucide="plus"></i>
-                        <span>Новая колода</span>
-                    </button>
-                </header>
-                
-                <!-- Статистика на сегодня -->
-                ${this.renderTodayStats()}
-                
-                <!-- Список колод -->
-                <section class="decks-section">
-                    ${decks.length === 0 
-                        ? this.renderEmptyDecks()
-                        : this.renderDecks(decks)}
-                </section>
-                
-                <!-- Быстрая генерация -->
-                <section class="generate-section">
-                    <div class="generate-card">
-                        <div class="generate-icon">
+                    
+                    <div class="decks-list" id="decks-list">
+                        ${this.renderDecksList(decks)}
+                    </div>
+                    
+                    <div class="sidebar-footer">
+                        <button class="btn btn-primary btn-block" id="generate-deck-btn">
                             <i data-lucide="sparkles"></i>
-                        </div>
-                        <div class="generate-content">
-                            <h3>Сгенерировать карточки</h3>
-                            <p>Используйте ИИ для автоматического создания карточек по теме</p>
-                        </div>
-                        <button class="btn btn-outline" id="generate-deck-btn">
-                            <i data-lucide="wand-2"></i>
                             <span>Сгенерировать</span>
                         </button>
                     </div>
-                </section>
+                </aside>
             </div>
             
             ${this.renderCreateDeckModal()}
@@ -77,8 +69,174 @@ export class CardsPage {
         `;
     }
     
+    renderCardsWelcome() {
+        return `
+            <div class="cards-welcome">
+                <div class="welcome-illustration">
+                    <i data-lucide="layers"></i>
+                </div>
+                <h2>Карточки для запоминания</h2>
+                <p>Выберите колоду из списка справа или создайте новую</p>
+                
+                <!-- Статистика -->
+                ${this.renderTodayStats()}
+                
+                <div class="welcome-actions">
+                    <button class="btn btn-primary" id="welcome-create-deck">
+                        <i data-lucide="plus"></i>
+                        <span>Создать колоду</span>
+                    </button>
+                    <button class="btn btn-outline" id="welcome-generate">
+                        <i data-lucide="sparkles"></i>
+                        <span>Сгенерировать</span>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    renderDeckContent() {
+        const deck = this.currentDeck;
+        const cards = this.app.storage.get('cards') || [];
+        const deckCards = cards.filter(c => c.deckId === deck.id);
+        const stats = this.getDeckStats(deckCards);
+        
+        return `
+            <div class="deck-content">
+                <!-- Заголовок колоды -->
+                <div class="deck-header-main">
+                    <div class="deck-info">
+                        <div class="deck-color-badge" style="background: ${deck.color || 'var(--color-primary)'}"></div>
+                        <div>
+                            <h1 class="deck-title-main">${deck.name}</h1>
+                            <p class="deck-description-main">${deck.description || 'Нет описания'}</p>
+                        </div>
+                    </div>
+                    <div class="deck-actions-main">
+                        <button class="btn btn-primary" id="start-study-btn" ${deckCards.length === 0 ? 'disabled' : ''}>
+                            <i data-lucide="play"></i>
+                            <span>Учить</span>
+                        </button>
+                        <button class="btn btn-outline" id="add-card-btn">
+                            <i data-lucide="plus"></i>
+                            <span>Добавить</span>
+                        </button>
+                        <button class="btn-icon" id="deck-menu-btn" title="Действия">
+                            <i data-lucide="more-vertical"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Статистика колоды -->
+                <div class="deck-stats-main">
+                    <div class="stat-item">
+                        <span class="stat-number">${stats.total}</span>
+                        <span class="stat-label">Всего</span>
+                    </div>
+                    <div class="stat-item due">
+                        <span class="stat-number">${stats.due}</span>
+                        <span class="stat-label">К повторению</span>
+                    </div>
+                    <div class="stat-item new">
+                        <span class="stat-number">${stats.new}</span>
+                        <span class="stat-label">Новых</span>
+                    </div>
+                </div>
+                
+                <!-- Список карточек -->
+                <div class="cards-list-section">
+                    <div class="section-header">
+                        <h3>Карточки</h3>
+                        <div class="section-actions">
+                            <input type="search" class="search-input" id="cards-search" placeholder="Поиск...">
+                        </div>
+                    </div>
+                    
+                    ${deckCards.length === 0 
+                        ? this.renderEmptyDeck()
+                        : this.renderCardsList(deckCards)}
+                </div>
+            </div>
+        `;
+    }
+    
+    renderDecksList(decks) {
+        if (decks.length === 0) {
+            return `
+                <div class="decks-empty">
+                    <i data-lucide="inbox"></i>
+                    <p>Нет колод</p>
+                </div>
+            `;
+        }
+        
+        const cards = this.app.storage.get('cards') || [];
+        
+        return decks.map(deck => {
+            const deckCards = cards.filter(c => c.deckId === deck.id);
+            const stats = this.getDeckStats(deckCards);
+            const isActive = this.currentDeck?.id === deck.id;
+            
+            return `
+                <div class="deck-item ${isActive ? 'active' : ''}" data-deck-id="${deck.id}">
+                    <div class="deck-item-color" style="background: ${deck.color || 'var(--color-primary)'}"></div>
+                    <div class="deck-item-content">
+                        <span class="deck-item-name">${deck.name}</span>
+                        <span class="deck-item-stats">
+                            <span class="due">${stats.due}</span> · 
+                            <span class="new">${stats.new}</span> · 
+                            <span>${stats.total}</span>
+                        </span>
+                    </div>
+                    <button class="btn-icon deck-item-menu" data-deck-id="${deck.id}">
+                        <i data-lucide="more-vertical"></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    renderEmptyDeck() {
+        return `
+            <div class="empty-deck">
+                <i data-lucide="file-plus"></i>
+                <p>В колоде пока нет карточек</p>
+                <button class="btn btn-primary" id="empty-add-card">
+                    <i data-lucide="plus"></i>
+                    Добавить карточку
+                </button>
+            </div>
+        `;
+    }
+    
+    renderCardsList(cards) {
+        return `
+            <div class="cards-grid">
+                ${cards.map(card => `
+                    <div class="card-item" data-card-id="${card.id}">
+                        <div class="card-item-front">${this.truncateText(card.front, 100)}</div>
+                        <div class="card-item-back">${this.truncateText(card.back, 80)}</div>
+                        <div class="card-item-actions">
+                            <button class="btn-icon card-edit" data-card-id="${card.id}" title="Редактировать">
+                                <i data-lucide="edit-2"></i>
+                            </button>
+                            <button class="btn-icon card-delete" data-card-id="${card.id}" title="Удалить">
+                                <i data-lucide="trash-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    truncateText(text, maxLength) {
+        if (!text) return '';
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength) + '...';
+    }
+    
     renderTodayStats() {
-        const decks = this.app.storage.get('decks') || [];
         const cards = this.app.storage.get('cards') || [];
         
         let dueToday = 0;
@@ -93,92 +251,31 @@ export class CardsPage {
             } else if (new Date(card.fsrs.due) <= now) {
                 dueToday++;
             }
-            if (card.fsrs?.state === 2) learned++; // Review state
+            if (card.fsrs?.state === 2) learned++;
         });
         
         return `
-            <div class="today-stats">
-                <div class="today-stat">
-                    <span class="stat-number due">${dueToday}</span>
-                    <span class="stat-label">К повторению</span>
+            <div class="today-stats-compact">
+                <div class="stat-item">
+                    <i data-lucide="clock"></i>
+                    <span class="stat-value due">${dueToday}</span>
+                    <span class="stat-label">к повторению</span>
                 </div>
-                <div class="today-stat">
-                    <span class="stat-number new">${newCards}</span>
-                    <span class="stat-label">Новых</span>
+                <div class="stat-item">
+                    <i data-lucide="sparkle"></i>
+                    <span class="stat-value new">${newCards}</span>
+                    <span class="stat-label">новых</span>
                 </div>
-                <div class="today-stat">
-                    <span class="stat-number learned">${learned}</span>
-                    <span class="stat-label">Изучено</span>
+                <div class="stat-item">
+                    <i data-lucide="check-circle"></i>
+                    <span class="stat-value">${learned}</span>
+                    <span class="stat-label">изучено</span>
                 </div>
-                <div class="today-stat">
-                    <span class="stat-number total">${cards.length}</span>
-                    <span class="stat-label">Всего</span>
-                </div>
-            </div>
-        `;
-    }
-    
-    renderEmptyDecks() {
-        return `
-            <div class="empty-state">
-                <div class="empty-icon">
+                <div class="stat-item">
                     <i data-lucide="layers"></i>
+                    <span class="stat-value">${cards.length}</span>
+                    <span class="stat-label">всего</span>
                 </div>
-                <h3>Нет колод</h3>
-                <p>Создайте первую колоду карточек или сгенерируйте с помощью ИИ</p>
-                <div class="empty-actions">
-                    <button class="btn btn-primary" id="empty-create-deck">
-                        <i data-lucide="plus"></i>
-                        <span>Создать колоду</span>
-                    </button>
-                </div>
-            </div>
-        `;
-    }
-    
-    renderDecks(decks) {
-        const cards = this.app.storage.get('cards') || [];
-        
-        return `
-            <div class="decks-grid">
-                ${decks.map(deck => {
-                    const deckCards = cards.filter(c => c.deckId === deck.id);
-                    const stats = this.getDeckStats(deckCards);
-                    
-                    return `
-                        <article class="deck-card" data-deck-id="${deck.id}">
-                            <div class="deck-header">
-                                <div class="deck-color" style="background: ${deck.color || 'var(--accent)'}"></div>
-                                <h3 class="deck-title">${deck.name}</h3>
-                                <button class="btn-icon deck-menu" data-deck-id="${deck.id}">
-                                    <i data-lucide="more-vertical"></i>
-                                </button>
-                            </div>
-                            <p class="deck-description">${deck.description || 'Нет описания'}</p>
-                            <div class="deck-stats">
-                                <span class="deck-stat due" title="К повторению">
-                                    <i data-lucide="clock"></i> ${stats.due}
-                                </span>
-                                <span class="deck-stat new" title="Новые">
-                                    <i data-lucide="sparkle"></i> ${stats.new}
-                                </span>
-                                <span class="deck-stat total" title="Всего">
-                                    <i data-lucide="layers"></i> ${stats.total}
-                                </span>
-                            </div>
-                            <div class="deck-actions">
-                                <button class="btn btn-primary btn-sm deck-study" data-deck-id="${deck.id}">
-                                    <i data-lucide="play"></i>
-                                    Учить
-                                </button>
-                                <button class="btn btn-outline btn-sm deck-browse" data-deck-id="${deck.id}">
-                                    <i data-lucide="list"></i>
-                                    Обзор
-                                </button>
-                            </div>
-                        </article>
-                    `;
-                }).join('')}
             </div>
         `;
     }
@@ -514,7 +611,7 @@ export class CardsPage {
             this.app.modal.open('create-deck-modal');
         });
         
-        container.querySelector('#empty-create-deck')?.addEventListener('click', () => {
+        container.querySelector('#welcome-create-deck')?.addEventListener('click', () => {
             this.app.modal.open('create-deck-modal');
         });
         
@@ -535,6 +632,10 @@ export class CardsPage {
             this.app.modal.open('generate-cards-modal');
         });
         
+        container.querySelector('#welcome-generate')?.addEventListener('click', () => {
+            this.app.modal.open('generate-cards-modal');
+        });
+        
         container.querySelector('#start-generate-cards')?.addEventListener('click', () => {
             this.generateCards();
         });
@@ -546,19 +647,45 @@ export class CardsPage {
             if (sliderValue) sliderValue.textContent = slider.value;
         });
         
-        // Изучение колоды
-        container.querySelectorAll('.deck-study').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.startReview(btn.dataset.deckId);
+        // Клик по колоде в sidebar
+        container.querySelectorAll('.deck-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (!e.target.closest('.deck-item-menu')) {
+                    const deckId = item.dataset.deckId;
+                    this.selectDeck(deckId);
+                }
             });
         });
         
-        // Обзор колоды
-        container.querySelectorAll('.deck-browse').forEach(btn => {
+        // Изучение выбранной колоды
+        container.querySelector('#start-study-btn')?.addEventListener('click', () => {
+            if (this.currentDeck) {
+                this.startReview(this.currentDeck.id);
+            }
+        });
+        
+        // Добавление карточки
+        container.querySelector('#add-card-btn')?.addEventListener('click', () => {
+            this.openAddCardModal();
+        });
+        
+        container.querySelector('#empty-add-card')?.addEventListener('click', () => {
+            this.openAddCardModal();
+        });
+        
+        // Редактирование карточек
+        container.querySelectorAll('.card-edit').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                this.browseDeck(btn.dataset.deckId);
+                this.editCard(btn.dataset.cardId);
+            });
+        });
+        
+        // Удаление карточек
+        container.querySelectorAll('.card-delete').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteCard(btn.dataset.cardId);
             });
         });
         
@@ -744,14 +871,71 @@ export class CardsPage {
     
     exitReview() {
         this.reviewMode = false;
-        this.currentDeck = null;
         this.reviewQueue = [];
         this.render(document.getElementById('main-content'));
     }
     
+    selectDeck(deckId) {
+        const decks = this.app.storage.get('decks') || [];
+        this.currentDeck = decks.find(d => d.id === deckId);
+        this.render(document.getElementById('main-content'));
+    }
+    
+    openAddCardModal() {
+        if (!this.currentDeck) return;
+        
+        // Очищаем поля
+        const frontInput = document.getElementById('card-front');
+        const backInput = document.getElementById('card-back');
+        if (frontInput) frontInput.value = '';
+        if (backInput) backInput.value = '';
+        
+        // Меняем заголовок
+        const modalTitle = document.querySelector('#edit-card-modal .modal-header h3');
+        if (modalTitle) modalTitle.textContent = 'Новая карточка';
+        
+        // Устанавливаем режим добавления
+        this.editingCardId = null;
+        
+        this.app.modal.open('edit-card-modal');
+    }
+    
+    editCard(cardId) {
+        const cards = this.app.storage.get('cards') || [];
+        const card = cards.find(c => c.id === cardId);
+        if (!card) return;
+        
+        const frontInput = document.getElementById('card-front');
+        const backInput = document.getElementById('card-back');
+        if (frontInput) frontInput.value = card.front || '';
+        if (backInput) backInput.value = card.back || '';
+        
+        const modalTitle = document.querySelector('#edit-card-modal .modal-header h3');
+        if (modalTitle) modalTitle.textContent = 'Редактировать карточку';
+        
+        this.editingCardId = cardId;
+        
+        this.app.modal.open('edit-card-modal');
+    }
+    
+    deleteCard(cardId) {
+        this.app.modal.confirm({
+            title: 'Удалить карточку?',
+            message: 'Это действие нельзя отменить.',
+            confirmText: 'Удалить',
+            isDanger: true,
+            onConfirm: () => {
+                const cards = this.app.storage.get('cards') || [];
+                const filtered = cards.filter(c => c.id !== cardId);
+                this.app.storage.set('cards', filtered);
+                this.render(document.getElementById('main-content'));
+                this.app.toast.success('Карточка удалена');
+            }
+        });
+    }
+    
     browseDeck(deckId) {
-        // TODO: Реализовать просмотр карточек колоды
-        this.app.toast.info('Функция в разработке');
+        this.selectDeck(deckId);
     }
     
     async generateCards() {

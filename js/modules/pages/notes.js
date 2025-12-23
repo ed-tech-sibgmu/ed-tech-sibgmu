@@ -13,14 +13,21 @@ export class NotesPage {
         this.isEditing = false;
         this.autoSaveTimer = null;
     }
-    
+
     render(container) {
         container.innerHTML = `
             <div class="page notes-page">
-                <!-- Боковая панель с файловой системой -->
+                <!-- Основная область (по центру) -->
+                <main class="notes-main">
+                    ${this.currentNote
+                ? this.renderEditor()
+                : this.renderEmptyState()}
+                </main>
+                
+                <!-- Боковая панель с файловой системой (справа) -->
                 <aside class="notes-sidebar">
                     <div class="sidebar-header">
-                        <h2>Конспекты</h2>
+                        <h2>Файлы</h2>
                         <div class="sidebar-actions">
                             <button class="btn-icon" id="new-folder-btn" title="Новая папка">
                                 <i data-lucide="folder-plus"></i>
@@ -38,17 +45,10 @@ export class NotesPage {
                     <div class="sidebar-footer">
                         <button class="btn btn-primary btn-block" id="generate-note-btn">
                             <i data-lucide="sparkles"></i>
-                            <span>Сгенерировать конспект</span>
+                            <span>Сгенерировать</span>
                         </button>
                     </div>
                 </aside>
-                
-                <!-- Основная область -->
-                <main class="notes-main">
-                    ${this.currentNote 
-                        ? this.renderEditor() 
-                        : this.renderEmptyState()}
-                </main>
             </div>
             
             <!-- Модальное окно генерации -->
@@ -57,17 +57,17 @@ export class NotesPage {
             <!-- Модальное окно создания папки -->
             ${this.renderFolderModal()}
         `;
-        
+
         this.initEvents(container);
         this.initMarkdownPreview();
     }
-    
+
     renderFileTree() {
         const notes = this.app.storage.get('notes') || [];
         const folders = this.app.storage.get('note_folders') || [
             { id: 'root', name: 'Корневая папка', parent: null }
         ];
-        
+
         if (folders.length === 0 && notes.length === 0) {
             return `
                 <div class="file-tree-empty">
@@ -77,25 +77,25 @@ export class NotesPage {
                 </div>
             `;
         }
-        
+
         return this.buildTreeHTML(folders, notes, null);
     }
-    
+
     buildTreeHTML(folders, notes, parentId) {
         const childFolders = folders.filter(f => f.parent === parentId && f.id !== 'root');
         const childNotes = notes.filter(n => n.folderId === parentId || (!n.folderId && parentId === null));
-        
+
         if (childFolders.length === 0 && childNotes.length === 0) {
             return '';
         }
-        
+
         let html = '<ul class="tree-list">';
-        
+
         // Папки
         for (const folder of childFolders) {
-            const hasChildren = folders.some(f => f.parent === folder.id) || 
-                               notes.some(n => n.folderId === folder.id);
-            
+            const hasChildren = folders.some(f => f.parent === folder.id) ||
+                notes.some(n => n.folderId === folder.id);
+
             html += `
                 <li class="tree-item folder ${hasChildren ? 'has-children' : ''}" data-folder-id="${folder.id}">
                     <div class="tree-item-content">
@@ -119,7 +119,7 @@ export class NotesPage {
                 </li>
             `;
         }
-        
+
         // Заметки
         for (const note of childNotes) {
             html += `
@@ -136,11 +136,11 @@ export class NotesPage {
                 </li>
             `;
         }
-        
+
         html += '</ul>';
         return html;
     }
-    
+
     renderEmptyState() {
         return `
             <div class="notes-empty-state">
@@ -162,10 +162,10 @@ export class NotesPage {
             </div>
         `;
     }
-    
+
     renderEditor() {
         const note = this.currentNote;
-        
+
         return `
             <div class="note-editor">
                 <!-- Toolbar -->
@@ -264,7 +264,7 @@ export class NotesPage {
             </div>
         `;
     }
-    
+
     renderGenerateModal() {
         return `
             <div class="modal" id="generate-note-modal">
@@ -337,7 +337,7 @@ export class NotesPage {
             </div>
         `;
     }
-    
+
     renderFolderModal() {
         return `
             <div class="modal" id="folder-modal">
@@ -366,36 +366,36 @@ export class NotesPage {
             </div>
         `;
     }
-    
+
     renderMarkdown(content) {
         if (!content) return '<p class="placeholder">Предпросмотр появится здесь...</p>';
-        
+
         try {
             // Обрабатываем callouts в стиле Obsidian
             let processed = this.processCallouts(content);
-            
+
             // Парсим Markdown
             let html = marked.parse(processed);
-            
+
             // Рендерим LaTeX
             html = this.renderLatex(html);
-            
+
             return html;
         } catch (e) {
             console.error('Markdown render error:', e);
             return `<pre>${content}</pre>`;
         }
     }
-    
+
     processCallouts(content) {
         // Obsidian-style callouts: > [!note] или > [!warning] и т.д.
         const calloutRegex = /^>\s*\[!(note|tip|warning|danger|example|info|quote)\](.*)$/gim;
-        
+
         return content.replace(calloutRegex, (match, type, title) => {
             return `<div class="callout callout-${type}"><div class="callout-title">${type.toUpperCase()}${title}</div>`;
         });
     }
-    
+
     renderLatex(html) {
         // Блочные формулы $$...$$
         html = html.replace(/\$\$([\s\S]+?)\$\$/g, (match, tex) => {
@@ -405,7 +405,7 @@ export class NotesPage {
                 return `<span class="latex-error">${tex}</span>`;
             }
         });
-        
+
         // Инлайн формулы $...$
         html = html.replace(/\$([^\$]+?)\$/g, (match, tex) => {
             try {
@@ -414,83 +414,83 @@ export class NotesPage {
                 return `<span class="latex-error">${tex}</span>`;
             }
         });
-        
+
         return html;
     }
-    
+
     countWords(text) {
         if (!text) return 0;
         return text.trim().split(/\s+/).filter(w => w.length > 0).length;
     }
-    
+
     formatDate(dateStr) {
         if (!dateStr) return '';
         const date = new Date(dateStr);
-        return date.toLocaleString('ru-RU', { 
-            day: 'numeric', 
-            month: 'short', 
-            hour: '2-digit', 
-            minute: '2-digit' 
+        return date.toLocaleString('ru-RU', {
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
         });
     }
-    
+
     initEvents(container) {
         // Файловое дерево
         this.initFileTreeEvents(container);
-        
+
         // Создание новой заметки
         container.querySelector('#new-note-btn')?.addEventListener('click', () => {
             this.createNewNote();
         });
-        
+
         container.querySelector('#empty-new-note')?.addEventListener('click', () => {
             this.createNewNote();
         });
-        
+
         // Создание папки
         container.querySelector('#new-folder-btn')?.addEventListener('click', () => {
             this.app.modal.open('folder-modal');
         });
-        
+
         container.querySelector('#create-folder')?.addEventListener('click', () => {
             this.createFolder();
         });
-        
+
         // Генерация
         container.querySelector('#generate-note-btn')?.addEventListener('click', () => {
             this.app.modal.open('generate-note-modal');
         });
-        
+
         container.querySelector('#empty-generate')?.addEventListener('click', () => {
             this.app.modal.open('generate-note-modal');
         });
-        
+
         container.querySelector('#start-generate')?.addEventListener('click', () => {
             this.generateNote();
         });
-        
+
         // Закрытие модалок
         container.querySelectorAll('[data-close]').forEach(btn => {
             btn.addEventListener('click', () => {
                 this.app.modal.close(btn.dataset.close);
             });
         });
-        
+
         container.querySelectorAll('.modal-backdrop').forEach(backdrop => {
             backdrop.addEventListener('click', (e) => {
                 const modal = e.target.closest('.modal');
                 if (modal) this.app.modal.close(modal.id);
             });
         });
-        
+
         // Редактор
         this.initEditorEvents(container);
     }
-    
+
     initFileTreeEvents(container) {
         const tree = container.querySelector('#file-tree');
         if (!tree) return;
-        
+
         // Раскрытие/сворачивание папок
         tree.querySelectorAll('.tree-toggle').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -503,7 +503,7 @@ export class NotesPage {
                 }
             });
         });
-        
+
         // Выбор заметки
         tree.querySelectorAll('.tree-item.note').forEach(item => {
             item.addEventListener('click', () => {
@@ -511,14 +511,14 @@ export class NotesPage {
                 this.openNote(noteId);
             });
         });
-        
+
         // Действия с элементами
         tree.querySelectorAll('.tree-action').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const action = btn.dataset.action;
                 const item = btn.closest('.tree-item');
-                
+
                 switch (action) {
                     case 'add-note':
                         this.createNewNote(item.dataset.folderId);
@@ -533,20 +533,20 @@ export class NotesPage {
             });
         });
     }
-    
+
     initEditorEvents(container) {
         const titleInput = container.querySelector('#note-title');
         const contentArea = container.querySelector('#note-content');
         const preview = container.querySelector('#note-preview');
-        
+
         if (!contentArea) return;
-        
+
         // Автосохранение
         const saveHandler = () => {
             if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
             this.autoSaveTimer = setTimeout(() => this.saveCurrentNote(), 1000);
         };
-        
+
         titleInput?.addEventListener('input', saveHandler);
         contentArea?.addEventListener('input', () => {
             saveHandler();
@@ -560,27 +560,27 @@ export class NotesPage {
                 wordCount.textContent = this.countWords(contentArea.value);
             }
         });
-        
+
         // Переключение режимов
         container.querySelectorAll('.view-toggle .toggle-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const view = btn.dataset.view;
                 container.querySelectorAll('.view-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                
+
                 const editorContent = container.querySelector('.editor-content');
                 const formattingBar = container.querySelector('.formatting-toolbar');
-                
+
                 editorContent.dataset.view = view;
                 this.isEditing = view === 'edit' || view === 'split';
                 formattingBar?.classList.toggle('hidden', view === 'preview');
-                
+
                 if (view !== 'edit') {
                     preview.innerHTML = this.renderMarkdown(contentArea.value);
                 }
             });
         });
-        
+
         // Форматирование
         container.querySelectorAll('.format-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -588,7 +588,7 @@ export class NotesPage {
                 this.applyFormat(format, contentArea);
             });
         });
-        
+
         // Горячие клавиши
         contentArea?.addEventListener('keydown', (e) => {
             if (e.ctrlKey || e.metaKey) {
@@ -609,12 +609,12 @@ export class NotesPage {
                 }
             }
         });
-        
+
         // Экспорт
         container.querySelector('#export-note')?.addEventListener('click', () => {
             this.exportCurrentNote();
         });
-        
+
         // Удаление
         container.querySelector('#delete-note')?.addEventListener('click', () => {
             if (this.currentNote) {
@@ -622,7 +622,7 @@ export class NotesPage {
             }
         });
     }
-    
+
     initMarkdownPreview() {
         // Настройка marked
         if (typeof marked !== 'undefined') {
@@ -638,16 +638,16 @@ export class NotesPage {
             });
         }
     }
-    
+
     applyFormat(format, textarea) {
         if (!textarea) return;
-        
+
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
         const selected = textarea.value.substring(start, end);
         let replacement = '';
         let cursorOffset = 0;
-        
+
         const formats = {
             bold: { prefix: '**', suffix: '**', placeholder: 'жирный текст' },
             italic: { prefix: '*', suffix: '*', placeholder: 'курсив' },
@@ -663,29 +663,29 @@ export class NotesPage {
             math: { prefix: '$', suffix: '$', placeholder: 'формула' },
             callout: { prefix: '> [!note] ', suffix: '\n> ', placeholder: 'Заголовок\n> Содержимое', lineStart: true }
         };
-        
+
         const fmt = formats[format];
         if (!fmt) return;
-        
+
         if (selected) {
             replacement = fmt.prefix + selected + fmt.suffix;
         } else {
             replacement = fmt.prefix + fmt.placeholder + fmt.suffix;
             cursorOffset = fmt.prefix.length + fmt.placeholder.length;
         }
-        
+
         // Вставляем
         textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
-        
+
         // Позиционируем курсор
         const newPos = selected ? start + replacement.length : start + cursorOffset;
         textarea.setSelectionRange(newPos, newPos);
         textarea.focus();
-        
+
         // Триггерим input для обновления превью
         textarea.dispatchEvent(new Event('input'));
     }
-    
+
     createNewNote(folderId = null) {
         const note = {
             id: this.generateId(),
@@ -695,54 +695,54 @@ export class NotesPage {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
-        
+
         const notes = this.app.storage.get('notes') || [];
         notes.push(note);
         this.app.storage.set('notes', notes);
-        
+
         this.currentNote = note;
         this.isEditing = true;
         this.render(document.getElementById('main-content'));
-        
+
         // Фокус на заголовок
         setTimeout(() => {
             document.getElementById('note-title')?.focus();
         }, 100);
     }
-    
+
     openNote(noteId) {
         const notes = this.app.storage.get('notes') || [];
         const note = notes.find(n => n.id === noteId);
-        
+
         if (note) {
             this.currentNote = note;
             this.isEditing = false;
             this.render(document.getElementById('main-content'));
         }
     }
-    
+
     saveCurrentNote() {
         if (!this.currentNote) return;
-        
+
         const titleInput = document.getElementById('note-title');
         const contentArea = document.getElementById('note-content');
-        
+
         if (titleInput) this.currentNote.title = titleInput.value;
         if (contentArea) this.currentNote.content = contentArea.value;
         this.currentNote.updatedAt = new Date().toISOString();
-        
+
         const notes = this.app.storage.get('notes') || [];
         const index = notes.findIndex(n => n.id === this.currentNote.id);
-        
+
         if (index !== -1) {
             notes[index] = this.currentNote;
         } else {
             notes.push(this.currentNote);
         }
-        
+
         this.app.storage.set('notes', notes);
     }
-    
+
     deleteNote(noteId) {
         this.app.modal.confirm({
             title: 'Удалить конспект?',
@@ -753,41 +753,41 @@ export class NotesPage {
                 const notes = this.app.storage.get('notes') || [];
                 const filtered = notes.filter(n => n.id !== noteId);
                 this.app.storage.set('notes', filtered);
-                
+
                 if (this.currentNote?.id === noteId) {
                     this.currentNote = null;
                 }
-                
+
                 this.render(document.getElementById('main-content'));
                 this.app.toast.success('Конспект удалён');
             }
         });
     }
-    
+
     createFolder() {
         const nameInput = document.getElementById('folder-name');
         const name = nameInput?.value.trim();
-        
+
         if (!name) {
             this.app.toast.warning('Введите название папки');
             return;
         }
-        
+
         const folder = {
             id: this.generateId(),
             name: name,
             parent: this.currentFolder
         };
-        
+
         const folders = this.app.storage.get('note_folders') || [];
         folders.push(folder);
         this.app.storage.set('note_folders', folders);
-        
+
         this.app.modal.close('folder-modal');
         this.render(document.getElementById('main-content'));
         this.app.toast.success('Папка создана');
     }
-    
+
     deleteFolder(folderId) {
         this.app.modal.confirm({
             title: 'Удалить папку?',
@@ -801,24 +801,24 @@ export class NotesPage {
                     if (n.folderId === folderId) n.folderId = null;
                 });
                 this.app.storage.set('notes', notes);
-                
+
                 // Удаляем папку
                 const folders = this.app.storage.get('note_folders') || [];
                 const filtered = folders.filter(f => f.id !== folderId);
                 this.app.storage.set('note_folders', filtered);
-                
+
                 this.render(document.getElementById('main-content'));
                 this.app.toast.success('Папка удалена');
             }
         });
     }
-    
+
     exportCurrentNote() {
         if (!this.currentNote) return;
-        
+
         const content = this.currentNote.content || '';
         const title = this.currentNote.title || 'Конспект';
-        
+
         const blob = new Blob([content], { type: 'text/markdown' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -826,37 +826,37 @@ export class NotesPage {
         a.download = `${title}.md`;
         a.click();
         URL.revokeObjectURL(url);
-        
+
         this.app.toast.success('Конспект экспортирован');
     }
-    
+
     async generateNote() {
         const topic = document.getElementById('generate-topic')?.value.trim();
         const size = document.querySelector('input[name="note-size"]:checked')?.value || 'medium';
         const instructions = document.getElementById('generate-instructions')?.value.trim();
-        
+
         if (!topic) {
             this.app.toast.warning('Введите тему конспекта');
             return;
         }
-        
+
         const apiKey = this.app.storage.get('anthropic_api_key');
         if (!apiKey) {
             this.app.toast.error('Добавьте API ключ Anthropic в настройках');
             return;
         }
-        
+
         // Показываем прогресс
         const progress = document.getElementById('generate-progress');
         progress?.classList.remove('hidden');
-        
+
         const btn = document.getElementById('start-generate');
         if (btn) btn.disabled = true;
-        
+
         try {
             const profile = this.app.storage.get('user_profile') || {};
             const content = await this.callClaudeAPI(apiKey, topic, size, instructions, profile);
-            
+
             // Создаём новую заметку
             const note = {
                 id: this.generateId(),
@@ -867,18 +867,18 @@ export class NotesPage {
                 updatedAt: new Date().toISOString(),
                 generated: true
             };
-            
+
             const notes = this.app.storage.get('notes') || [];
             notes.push(note);
             this.app.storage.set('notes', notes);
-            
+
             this.app.modal.close('generate-note-modal');
             this.currentNote = note;
             this.isEditing = false;
             this.render(document.getElementById('main-content'));
-            
+
             this.app.toast.success('Конспект сгенерирован!');
-            
+
         } catch (error) {
             console.error('Generate error:', error);
             this.app.toast.error('Ошибка генерации: ' + error.message);
@@ -887,17 +887,17 @@ export class NotesPage {
             if (btn) btn.disabled = false;
         }
     }
-    
+
     async callClaudeAPI(apiKey, topic, size, instructions, profile) {
         const sizeTokens = {
             brief: 2000,
             medium: 8000,
             detailed: 16000
         };
-        
+
         const systemPrompt = this.buildSystemPrompt(profile);
         const userPrompt = this.buildUserPrompt(topic, size, instructions);
-        
+
         const response = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
@@ -915,16 +915,16 @@ export class NotesPage {
                 ]
             })
         });
-        
+
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error?.message || 'API Error');
         }
-        
+
         const data = await response.json();
         return data.content[0].text;
     }
-    
+
     buildSystemPrompt(profile) {
         return `Ты — эксперт по созданию учебных конспектов. Создавай структурированные конспекты в формате Markdown с поддержкой LaTeX для формул.
 
@@ -964,23 +964,23 @@ export class NotesPage {
 - Разделяй: устоявшиеся факты / общепринятые модели / активно исследуемые области
 </base_instructions>`;
     }
-    
+
     buildUserPrompt(topic, size, instructions) {
         const sizeDesc = {
             brief: 'краткий конспект (~5 000 символов) с ключевыми тезисами и определениями',
             medium: 'полноценный конспект (~20 000 символов) с примерами и объяснениями',
             detailed: 'развёрнутый конспект (~40 000 символов) с глубоким разбором механизмов'
         };
-        
+
         let prompt = `Создай ${sizeDesc[size]} по теме: "${topic}".`;
-        
+
         if (instructions) {
             prompt += `\n\nДополнительные требования: ${instructions}`;
         }
-        
+
         return prompt;
     }
-    
+
     generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }

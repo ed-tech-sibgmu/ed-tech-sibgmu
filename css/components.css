@@ -160,7 +160,7 @@
 
 .module-card {
     background: var(--color-card);
-    border: 1px solid var(--color-card-border);
+    border: 2px solid var(--color-card-border);
     border-radius: var(--radius-xl);
     padding: var(--space-6);
     cursor: pointer;
@@ -169,26 +169,10 @@
     overflow: hidden;
 }
 
-.module-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--module-color, var(--color-primary));
-    opacity: 0;
-    transition: opacity var(--transition-fast);
-}
-
 .module-card:hover {
-    border-color: var(--module-color, var(--color-primary));
+    border-color: var(--color-primary);
     transform: translateY(-4px);
     box-shadow: var(--shadow-card-hover);
-}
-
-.module-card:hover::before {
-    opacity: 1;
 }
 
 .module-card-icon {

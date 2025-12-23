@@ -9,13 +9,13 @@ export class TestsPage {
     constructor(app) {
         this.app = app;
         this.container = null;
-        
+
         // Текущий тест
         this.currentTest = null;
         this.currentQuestionIndex = 0;
         this.userAnswers = [];
         this.testStartTime = null;
-        
+
         // Конфигурация генерации
         this.config = {
             topic: '',
@@ -23,22 +23,27 @@ export class TestsPage {
             questionTypes: ['single', 'multiple', 'matching'],
             difficulty: 'mixed' // easy, medium, hard, mixed
         };
-        
+
         // Сохранённые тесты
         this.tests = this.app.storage.get('tests') || [];
     }
-    
+
     /**
      * Рендер страницы
      */
     render(container) {
         this.container = container;
         this.tests = this.app.storage.get('tests') || [];
-        
+
         container.innerHTML = `
             <div class="page tests-page">
                 <div class="tests-layout">
-                <!-- Сайдбар с тестами -->
+                <!-- Основная область (слева) -->
+                <main class="tests-main" id="tests-main">
+                    ${this.renderWelcome()}
+                </main>
+                
+                <!-- Сайдбар с тестами (справа) -->
                 <aside class="tests-sidebar">
                     <div class="tests-sidebar-header">
                         <h2>Мои тесты</h2>
@@ -52,19 +57,14 @@ export class TestsPage {
                         ${this.renderTestsList()}
                     </div>
                 </aside>
-                
-                <!-- Основная область -->
-                <main class="tests-main" id="tests-main">
-                    ${this.renderWelcome()}
-                </main>
             </div>
             </div>
         `;
-        
+
         this.bindEvents();
         lucide.createIcons();
     }
-    
+
     /**
      * Рендер списка тестов
      */
@@ -77,7 +77,7 @@ export class TestsPage {
                 </div>
             `;
         }
-        
+
         return this.tests.map((test, index) => `
             <div class="test-item ${this.currentTest?.id === test.id ? 'active' : ''}" 
                  data-test-id="${test.id}">
@@ -103,7 +103,7 @@ export class TestsPage {
             </div>
         `).join('');
     }
-    
+
     /**
      * Приветственный экран
      */
@@ -122,13 +122,13 @@ export class TestsPage {
             </div>
         `;
     }
-    
+
     /**
      * Форма создания теста
      */
     renderCreateForm() {
         const profile = this.app.storage.get('user_profile') || {};
-        
+
         return `
             <div class="test-create-form">
                 <div class="form-header">
@@ -225,14 +225,14 @@ export class TestsPage {
             </div>
         `;
     }
-    
+
     /**
      * Экран прохождения теста
      */
     renderTestScreen() {
         const question = this.currentTest.questions[this.currentQuestionIndex];
         const progress = ((this.currentQuestionIndex + 1) / this.currentTest.questions.length) * 100;
-        
+
         return `
             <div class="test-screen">
                 <!-- Хедер теста -->
@@ -279,23 +279,23 @@ export class TestsPage {
                     </div>
                     
                     <button class="btn btn-primary" id="next-question">
-                        ${this.currentQuestionIndex === this.currentTest.questions.length - 1 
-                            ? 'Завершить' 
-                            : 'Далее'}
-                        <i data-lucide="${this.currentQuestionIndex === this.currentTest.questions.length - 1 
-                            ? 'check' : 'arrow-right'}"></i>
+                        ${this.currentQuestionIndex === this.currentTest.questions.length - 1
+                ? 'Завершить'
+                : 'Далее'}
+                        <i data-lucide="${this.currentQuestionIndex === this.currentTest.questions.length - 1
+                ? 'check' : 'arrow-right'}"></i>
                     </button>
                 </div>
             </div>
         `;
     }
-    
+
     /**
      * Рендер вариантов ответа
      */
     renderAnswers(question) {
         const currentAnswer = this.userAnswers[this.currentQuestionIndex];
-        
+
         switch (question.type) {
             case 'single':
                 return question.options.map((option, i) => `
@@ -306,7 +306,7 @@ export class TestsPage {
                         <span class="answer-text">${option}</span>
                     </label>
                 `).join('');
-                
+
             case 'multiple':
                 const selectedMultiple = currentAnswer || [];
                 return question.options.map((option, i) => `
@@ -317,10 +317,10 @@ export class TestsPage {
                         <span class="answer-text">${option}</span>
                     </label>
                 `).join('');
-                
+
             case 'matching':
                 return this.renderMatchingQuestion(question, currentAnswer);
-                
+
             case 'open':
                 return `
                     <div class="open-answer">
@@ -329,18 +329,18 @@ export class TestsPage {
                                   rows="4">${currentAnswer || ''}</textarea>
                     </div>
                 `;
-                
+
             default:
                 return '';
         }
     }
-    
+
     /**
      * Рендер вопроса на сопоставление
      */
     renderMatchingQuestion(question, currentAnswer) {
         const matches = currentAnswer || {};
-        
+
         return `
             <div class="matching-question">
                 <div class="matching-left">
@@ -361,14 +361,14 @@ export class TestsPage {
             </div>
         `;
     }
-    
+
     /**
      * Экран результатов
      */
     renderResults() {
         const results = this.calculateResults();
         const scoreClass = this.getScoreClass(results.percentage);
-        
+
         return `
             <div class="test-results">
                 <div class="results-header ${scoreClass}">
@@ -391,9 +391,9 @@ export class TestsPage {
                 <div class="results-body">
                     <h3>Разбор ответов</h3>
                     <div class="results-questions">
-                        ${this.currentTest.questions.map((q, i) => 
-                            this.renderQuestionResult(q, i, results.details[i])
-                        ).join('')}
+                        ${this.currentTest.questions.map((q, i) =>
+            this.renderQuestionResult(q, i, results.details[i])
+        ).join('')}
                     </div>
                 </div>
                 
@@ -410,13 +410,13 @@ export class TestsPage {
             </div>
         `;
     }
-    
+
     /**
      * Рендер результата одного вопроса
      */
     renderQuestionResult(question, index, detail) {
         const isCorrect = detail.correct;
-        
+
         return `
             <div class="result-question ${isCorrect ? 'correct' : 'incorrect'}">
                 <div class="result-question-header">
@@ -450,7 +450,7 @@ export class TestsPage {
             </div>
         `;
     }
-    
+
     /**
      * Привязка обработчиков
      */
@@ -459,21 +459,21 @@ export class TestsPage {
         this.container.querySelector('#new-test-btn')?.addEventListener('click', () => {
             this.showCreateForm();
         });
-        
+
         this.container.querySelector('#welcome-new-test')?.addEventListener('click', () => {
             this.showCreateForm();
         });
-        
+
         // Клик по тесту в списке
         this.container.querySelector('#tests-list')?.addEventListener('click', (e) => {
             const testItem = e.target.closest('.test-item');
             const action = e.target.closest('[data-action]')?.dataset.action;
-            
+
             if (!testItem) return;
-            
+
             const testId = testItem.dataset.testId;
             const test = this.tests.find(t => t.id === testId);
-            
+
             if (action === 'delete') {
                 this.deleteTest(testId);
             } else if (action === 'start') {
@@ -483,41 +483,41 @@ export class TestsPage {
             }
         });
     }
-    
+
     /**
      * Привязка обработчиков формы создания
      */
     bindCreateFormEvents() {
         const main = document.getElementById('tests-main');
-        
+
         // Слайдер количества
         const slider = main.querySelector('#question-count');
         const sliderValue = main.querySelector('#question-count-value');
         slider?.addEventListener('input', () => {
             sliderValue.textContent = slider.value;
         });
-        
+
         // Закрытие формы
         main.querySelector('#close-create-form')?.addEventListener('click', () => {
             this.showWelcome();
         });
-        
+
         main.querySelector('#cancel-create')?.addEventListener('click', () => {
             this.showWelcome();
         });
-        
+
         // Генерация теста
         main.querySelector('#generate-test')?.addEventListener('click', () => {
             this.generateTest();
         });
     }
-    
+
     /**
      * Привязка обработчиков теста
      */
     bindTestEvents() {
         const main = document.getElementById('tests-main');
-        
+
         // Выбор ответа
         main.querySelectorAll('.answer-option input').forEach(input => {
             input.addEventListener('change', () => {
@@ -525,35 +525,35 @@ export class TestsPage {
                 this.updateAnswerStyles();
             });
         });
-        
+
         // Matching selects
         main.querySelectorAll('.matching-select').forEach(select => {
             select.addEventListener('change', () => {
                 this.saveAnswer();
             });
         });
-        
+
         // Open answer
         main.querySelector('#open-answer-input')?.addEventListener('input', (e) => {
             this.userAnswers[this.currentQuestionIndex] = e.target.value;
         });
-        
+
         // Навигация
         main.querySelector('#prev-question')?.addEventListener('click', () => {
             this.prevQuestion();
         });
-        
+
         main.querySelector('#next-question')?.addEventListener('click', () => {
             this.nextQuestion();
         });
-        
+
         // Точки навигации
         main.querySelectorAll('.question-dots .dot').forEach(dot => {
             dot.addEventListener('click', () => {
                 this.goToQuestion(parseInt(dot.dataset.question));
             });
         });
-        
+
         // Выход из теста
         main.querySelector('#exit-test')?.addEventListener('click', () => {
             this.app.modal.confirm({
@@ -568,24 +568,24 @@ export class TestsPage {
             });
         });
     }
-    
+
     /**
      * Привязка обработчиков результатов
      */
     bindResultsEvents() {
         const main = document.getElementById('tests-main');
-        
+
         main.querySelector('#retry-test')?.addEventListener('click', () => {
             this.startTest(this.currentTest);
         });
-        
+
         main.querySelector('#back-to-tests')?.addEventListener('click', () => {
             this.currentTest = null;
             this.showWelcome();
             this.updateTestsList();
         });
     }
-    
+
     /**
      * Показать форму создания
      */
@@ -595,7 +595,7 @@ export class TestsPage {
         this.bindCreateFormEvents();
         lucide.createIcons();
     }
-    
+
     /**
      * Показать приветствие
      */
@@ -603,37 +603,37 @@ export class TestsPage {
         const main = document.getElementById('tests-main');
         main.innerHTML = this.renderWelcome();
         lucide.createIcons();
-        
+
         main.querySelector('#welcome-new-test')?.addEventListener('click', () => {
             this.showCreateForm();
         });
     }
-    
+
     /**
      * Генерация теста
      */
     async generateTest() {
         const main = document.getElementById('tests-main');
-        
+
         // Собираем конфигурацию
         const topic = main.querySelector('#test-topic').value.trim();
         if (!topic) {
             this.app.toast.warning('Укажите тему теста');
             return;
         }
-        
+
         const questionCount = parseInt(main.querySelector('#question-count').value);
         const questionTypes = Array.from(main.querySelectorAll('input[name="q-type"]:checked'))
             .map(cb => cb.value);
         const difficulty = main.querySelector('input[name="difficulty"]:checked')?.value || 'mixed';
-        
+
         if (questionTypes.length === 0) {
             this.app.toast.warning('Выберите хотя бы один тип вопросов');
             return;
         }
-        
+
         this.config = { topic, questionCount, questionTypes, difficulty };
-        
+
         // Показываем лоадер
         main.innerHTML = `
             <div class="generation-progress">
@@ -642,41 +642,41 @@ export class TestsPage {
                 <p>Создаём ${questionCount} вопросов по теме «${topic}»</p>
             </div>
         `;
-        
+
         try {
             // Проверяем API ключ
             const apiKey = this.app.storage.get('gemini_api_key');
             if (!apiKey) {
                 throw new Error('Не указан API ключ Gemini. Добавьте его в настройках.');
             }
-            
+
             const test = await this.callAI(this.config);
-            
+
             // Сохраняем тест
             this.tests.unshift(test);
             this.saveTests();
-            
+
             // Начинаем тест
             this.startTest(test);
-            
+
             this.app.toast.success('Тест успешно создан!');
-            
+
         } catch (error) {
             console.error('Generation error:', error);
             this.app.toast.error(error.message || 'Ошибка генерации теста');
             this.showCreateForm();
         }
     }
-    
+
     /**
      * Вызов AI для генерации
      */
     async callAI(config) {
         const apiKey = this.app.storage.get('gemini_api_key');
         const profile = this.app.storage.get('user_profile') || {};
-        
+
         const prompt = this.buildPrompt(config, profile);
-        
+
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
             {
@@ -691,30 +691,30 @@ export class TestsPage {
                 })
             }
         );
-        
+
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error?.message || 'Ошибка API');
         }
-        
+
         const data = await response.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        
+
         if (!text) {
             throw new Error('Пустой ответ от API');
         }
-        
+
         // Парсим JSON из ответа
-        const jsonMatch = text.match(/```json\n?([\s\S]*?)\n?```/) || 
-                         text.match(/\{[\s\S]*\}/);
-        
+        const jsonMatch = text.match(/```json\n?([\s\S]*?)\n?```/) ||
+            text.match(/\{[\s\S]*\}/);
+
         if (!jsonMatch) {
             throw new Error('Не удалось распарсить ответ');
         }
-        
+
         const jsonStr = jsonMatch[1] || jsonMatch[0];
         const testData = JSON.parse(jsonStr);
-        
+
         return {
             id: this.generateId(),
             title: config.topic,
@@ -724,7 +724,7 @@ export class TestsPage {
             lastScore: undefined
         };
     }
-    
+
     /**
      * Построение промпта для генерации
      */
@@ -735,11 +735,11 @@ export class TestsPage {
             matching: 'Вопрос на сопоставление (4-5 пар)',
             open: 'Открытый вопрос (требует текстового ответа)'
         };
-        
+
         const selectedTypes = config.questionTypes
             .map(t => `- ${typeDescriptions[t]}`)
             .join('\n');
-        
+
         return `Ты — генератор образовательных тестов. Создай тест по теме "${config.topic}".
 
 ПРОФИЛЬ СТУДЕНТА:
@@ -798,7 +798,7 @@ ${selectedTypes}
 
 Создай ${config.questionCount} вопросов.`;
     }
-    
+
     /**
      * Начать тест
      */
@@ -807,22 +807,22 @@ ${selectedTypes}
         this.currentQuestionIndex = 0;
         this.userAnswers = new Array(test.questions.length).fill(undefined);
         this.testStartTime = Date.now();
-        
+
         const main = document.getElementById('tests-main');
         main.innerHTML = this.renderTestScreen();
         this.bindTestEvents();
         lucide.createIcons();
-        
+
         this.updateTestsList();
     }
-    
+
     /**
      * Выбрать тест (показать детали)
      */
     selectTest(test) {
         this.currentTest = test;
         this.updateTestsList();
-        
+
         const main = document.getElementById('tests-main');
         main.innerHTML = `
             <div class="test-details">
@@ -842,35 +842,35 @@ ${selectedTypes}
                 </div>
             </div>
         `;
-        
+
         lucide.createIcons();
-        
+
         main.querySelector('#start-selected-test')?.addEventListener('click', () => {
             this.startTest(test);
         });
     }
-    
+
     /**
      * Сохранить ответ
      */
     saveAnswer() {
         const main = document.getElementById('tests-main');
         const question = this.currentTest.questions[this.currentQuestionIndex];
-        
+
         switch (question.type) {
             case 'single':
                 const selected = main.querySelector('input[name="answer"]:checked');
-                this.userAnswers[this.currentQuestionIndex] = selected 
-                    ? parseInt(selected.value) 
+                this.userAnswers[this.currentQuestionIndex] = selected
+                    ? parseInt(selected.value)
                     : undefined;
                 break;
-                
+
             case 'multiple':
                 const checked = main.querySelectorAll('input[name="answer"]:checked');
                 this.userAnswers[this.currentQuestionIndex] = Array.from(checked)
                     .map(cb => parseInt(cb.value));
                 break;
-                
+
             case 'matching':
                 const matches = {};
                 main.querySelectorAll('.matching-select').forEach(select => {
@@ -882,7 +882,7 @@ ${selectedTypes}
                 break;
         }
     }
-    
+
     /**
      * Обновить стили ответов
      */
@@ -893,7 +893,7 @@ ${selectedTypes}
             option.classList.toggle('selected', input.checked);
         });
     }
-    
+
     /**
      * Предыдущий вопрос
      */
@@ -903,13 +903,13 @@ ${selectedTypes}
             this.updateTestScreen();
         }
     }
-    
+
     /**
      * Следующий вопрос
      */
     nextQuestion() {
         this.saveAnswer();
-        
+
         if (this.currentQuestionIndex < this.currentTest.questions.length - 1) {
             this.currentQuestionIndex++;
             this.updateTestScreen();
@@ -917,7 +917,7 @@ ${selectedTypes}
             this.showResults();
         }
     }
-    
+
     /**
      * Перейти к вопросу
      */
@@ -926,7 +926,7 @@ ${selectedTypes}
         this.currentQuestionIndex = index;
         this.updateTestScreen();
     }
-    
+
     /**
      * Обновить экран теста
      */
@@ -936,26 +936,26 @@ ${selectedTypes}
         this.bindTestEvents();
         lucide.createIcons();
     }
-    
+
     /**
      * Показать результаты
      */
     showResults() {
         const results = this.calculateResults();
-        
+
         // Сохраняем лучший результат
-        if (this.currentTest.lastScore === undefined || 
+        if (this.currentTest.lastScore === undefined ||
             results.percentage > this.currentTest.lastScore) {
             this.currentTest.lastScore = results.percentage;
             this.saveTests();
         }
-        
+
         const main = document.getElementById('tests-main');
         main.innerHTML = this.renderResults();
         this.bindResultsEvents();
         lucide.createIcons();
     }
-    
+
     /**
      * Расчёт результатов
      */
@@ -963,21 +963,21 @@ ${selectedTypes}
         const details = this.currentTest.questions.map((q, i) => {
             const userAnswer = this.userAnswers[i];
             const correctAnswer = q.correct;
-            
+
             let isCorrect = false;
-            
+
             switch (q.type) {
                 case 'single':
                     isCorrect = userAnswer === correctAnswer;
                     break;
-                    
+
                 case 'multiple':
                     const userArr = userAnswer || [];
                     const correctArr = correctAnswer || [];
                     isCorrect = userArr.length === correctArr.length &&
-                               userArr.every(a => correctArr.includes(a));
+                        userArr.every(a => correctArr.includes(a));
                     break;
-                    
+
                 case 'matching':
                     const userMatches = userAnswer || {};
                     const correctMatches = correctAnswer || {};
@@ -985,7 +985,7 @@ ${selectedTypes}
                         k => userMatches[k] === correctMatches[k]
                     );
                     break;
-                    
+
                 case 'open':
                     // Простая проверка по ключевым словам
                     const keywords = (correctAnswer || '').toLowerCase().split(/[,;]+/);
@@ -993,22 +993,22 @@ ${selectedTypes}
                     isCorrect = keywords.some(kw => answer.includes(kw.trim()));
                     break;
             }
-            
+
             return {
                 correct: isCorrect,
                 userAnswer,
                 correctAnswer
             };
         });
-        
+
         const correct = details.filter(d => d.correct).length;
         const total = this.currentTest.questions.length;
         const percentage = Math.round((correct / total) * 100);
         const time = Date.now() - this.testStartTime;
-        
+
         return { correct, total, percentage, time, details };
     }
-    
+
     /**
      * Форматирование ответа для отображения
      */
@@ -1016,27 +1016,27 @@ ${selectedTypes}
         if (answer === undefined || answer === null) {
             return '<em>Нет ответа</em>';
         }
-        
+
         switch (question.type) {
             case 'single':
                 return question.options[answer] || answer;
-                
+
             case 'multiple':
                 return (answer || []).map(i => question.options[i]).join(', ') || '<em>Нет ответа</em>';
-                
+
             case 'matching':
                 return Object.entries(answer || {})
                     .map(([l, r]) => `${question.left[l]} → ${question.right[r]}`)
                     .join('; ') || '<em>Нет ответа</em>';
-                    
+
             case 'open':
                 return answer || '<em>Нет ответа</em>';
-                
+
             default:
                 return String(answer);
         }
     }
-    
+
     /**
      * Удалить тест
      */
@@ -1051,17 +1051,17 @@ ${selectedTypes}
                 this.tests = this.tests.filter(t => t.id !== testId);
                 this.saveTests();
                 this.updateTestsList();
-                
+
                 if (this.currentTest?.id === testId) {
                     this.currentTest = null;
                     this.showWelcome();
                 }
-                
+
                 this.app.toast.success('Тест удалён');
             }
         });
     }
-    
+
     /**
      * Обновить список тестов
      */
@@ -1072,21 +1072,21 @@ ${selectedTypes}
             lucide.createIcons();
         }
     }
-    
+
     /**
      * Сохранить тесты
      */
     saveTests() {
         this.app.storage.set('tests', this.tests);
     }
-    
+
     /**
      * Вспомогательные методы
      */
     generateId() {
         return 'test_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
-    
+
     getQuestionTypeName(type) {
         const names = {
             single: 'Один ответ',
@@ -1096,14 +1096,14 @@ ${selectedTypes}
         };
         return names[type] || type;
     }
-    
+
     getScoreClass(score) {
         if (score >= 90) return 'excellent';
         if (score >= 70) return 'good';
         if (score >= 50) return 'average';
         return 'poor';
     }
-    
+
     formatTime(ms) {
         const seconds = Math.floor(ms / 1000);
         const minutes = Math.floor(seconds / 60);
