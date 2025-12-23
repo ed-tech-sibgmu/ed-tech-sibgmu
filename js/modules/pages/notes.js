@@ -840,7 +840,7 @@ export class NotesPage {
             return;
         }
 
-        const apiKey = this.app.storage.get('anthropic_api_key');
+        const apiKey = "${secrets.HUGGING_FACE_TOKEN}";
         if (!apiKey) {
             this.app.toast.error('Добавьте API ключ Anthropic в настройках');
             return;
@@ -855,7 +855,7 @@ export class NotesPage {
 
         try {
             const profile = this.app.storage.get('user_profile') || {};
-            const content = await this.callClaudeAPI(apiKey, topic, size, instructions, profile);
+            const content = await this.callAI(apiKey, topic, size, instructions, profile);
 
             // Создаём новую заметку
             const note = {
@@ -888,7 +888,7 @@ export class NotesPage {
         }
     }
 
-    async callClaudeAPI(apiKey, topic, size, instructions, profile) {
+    async callAI(apiKey, topic, size, instructions, profile) {
         const sizeTokens = {
             brief: 2000,
             medium: 8000,
@@ -898,22 +898,17 @@ export class NotesPage {
         const systemPrompt = this.buildSystemPrompt(profile);
         const userPrompt = this.buildUserPrompt(topic, size, instructions);
 
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
+        const response = await fetch('https://router.huggingface.co/v1/chat/completions', {
             method: 'POST',
-            headers: {
+            headers: { 
                 'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01',
-                'anthropic-dangerous-direct-browser-access': 'true'
+            	Authorization: `Bearer "${secrets.HUGGING_FACE_TOKEN}"`,
             },
             body: JSON.stringify({
-                model: 'claude-sonnet-4-20250514',
-                max_tokens: sizeTokens[size] || 8000,
-                system: systemPrompt,
-                messages: [
-                    { role: 'user', content: userPrompt }
-                ]
-            })
+                "system": systemPrompt,
+                "messages":[{"role":"user","content": userPrompt}],
+                "model":"deepseek-ai/DeepSeek-V3.2"})
+
         });
 
         if (!response.ok) {
