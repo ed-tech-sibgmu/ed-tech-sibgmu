@@ -91,30 +91,39 @@ function removeLoadingMessage() {
 // API calls to Hugging Face Inference API
 async function callAI(prompt) {
     try {
-        const response = await fetch('https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                inputs: prompt,
-                parameters: {
-                    max_new_tokens: 1024,
-                    temperature: 0.7
-                }
-            })
+        const data = await await query({ 
+            messages: [
+                {
+                    role: "user",
+                    content: prompt,
+                },
+            ],
+            model: "deepseek-ai/DeepSeek-V3.2:novita",
         });
 
-        if (!response.ok) {
-            throw new Error(`API Error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data[0].generated_text.substring(prompt.length).trim();
+        console.log(data);
+        return data.choices[0].message.content;
     } catch (error) {
         console.error('API Error:', error);
         return `❌ Ошибка подключения к ИИ: ${error.message}. Попробуйте позже или перезагрузите страницу.`;
     }
+}
+
+async function query(data) {
+	const response = await fetch(
+		"https://router.huggingface.co/v1/chat/completions",
+		{
+			headers: {
+				Authorization: `Bearer ${secrets.HUGGING_FACE_TOKEN}`,
+				"Content-Type": "application/json",
+			},
+			method: "POST",
+			body: JSON.stringify(data),
+		}
+	);
+
+	const result = await response.json();
+	return result;
 }
 
 // Generate learning program
