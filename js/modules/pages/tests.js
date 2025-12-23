@@ -644,8 +644,7 @@ export class TestsPage {
         `;
 
         try {
-            // Проверяем API ключ
-            const apiKey = this.app.storage.get('gemini_api_key');
+            const apiKey = '${secrets.HUGGING_FACE_TOKEN}';
             if (!apiKey) {
                 throw new Error('Не указан API ключ Gemini. Добавьте его в настройках.');
             }
@@ -672,23 +671,19 @@ export class TestsPage {
      * Вызов AI для генерации
      */
     async callAI(config) {
-        const apiKey = this.app.storage.get('gemini_api_key');
         const profile = this.app.storage.get('user_profile') || {};
 
         const prompt = this.buildPrompt(config, profile);
 
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+            "https://router.huggingface.co/v1/chat/completions",
             {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: {
-                        temperature: 0.7,
-                        maxOutputTokens: 8192
-                    }
-                })
+                headers: { 
+                    'Content-Type': 'application/json',
+            		Authorization: 'Bearer ${secrets.HUGGING_FACE_TOKEN}',
+                },
+                body: JSON.stringify({"messages":[{"role":"user","content":prompt}],"model":"deepseek-ai/DeepSeek-V3.2"})
             }
         );
 
@@ -698,7 +693,8 @@ export class TestsPage {
         }
 
         const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        console.log(data)
+        const text = data.choices[0]?.message?.content;
 
         if (!text) {
             throw new Error('Пустой ответ от API');

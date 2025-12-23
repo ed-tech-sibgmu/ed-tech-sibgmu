@@ -213,14 +213,14 @@ class App {
     }
     
     updateThemeButtons() {
-        const currentTheme = this.storage.get('theme') || 'system';
+        const currentTheme = this.theme.getTheme();
         document.querySelectorAll('.theme-option').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.theme === currentTheme);
         });
     }
     
     updateAccentButtons() {
-        const currentAccent = this.storage.get('accent') || 'violet';
+        const currentAccent = this.theme.getAccent();
         document.querySelectorAll('.accent-option').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.accent === currentAccent);
         });
@@ -344,6 +344,17 @@ class App {
                 const activeModal = document.querySelector('.modal.active');
                 if (activeModal) {
                     this.modal.close(activeModal.id);
+                }
+            }
+        });
+        
+        // Глобальный обработчик для закрытия модалок по клику на backdrop
+        document.addEventListener('click', (e) => {
+            // Проверяем, был ли клик по backdrop
+            if (e.target.classList.contains('modal-backdrop')) {
+                const modal = e.target.closest('.modal');
+                if (modal && modal.classList.contains('active')) {
+                    this.modal.close(modal.id);
                 }
             }
         });

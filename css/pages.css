@@ -23,6 +23,13 @@
 
 .page-header {
     margin-bottom: var(--space-10);
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
 }
 
 .page-title {
@@ -359,6 +366,220 @@
     border: 1px solid var(--color-outline-variant);
     border-radius: var(--radius-lg);
     overflow: hidden;
+}
+
+/* Obsidian-style Editor */
+.note-editor.obsidian-style {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.editor-header-bar {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-outline-variant);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    background: var(--color-surface);
+    flex-shrink: 0;
+}
+
+.note-title-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--color-text);
+    padding: var(--space-2);
+    border-radius: var(--radius-md);
+    transition: background var(--transition-fast);
+}
+
+.note-title-input:hover {
+    background: var(--color-surface-container);
+}
+
+.note-title-input:focus {
+    outline: none;
+    background: var(--color-surface-container-high);
+}
+
+.header-actions {
+    display: flex;
+    gap: var(--space-1);
+}
+
+.mode-toggle {
+    position: relative;
+}
+
+.mode-toggle.reading {
+    color: var(--color-primary);
+}
+
+.mode-toggle.editing {
+    color: var(--color-success);
+}
+
+/* Единая область редактирования/просмотра */
+.editor-unified-area {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+}
+
+.editor-unified-area.read-mode {
+    cursor: text;
+}
+
+.editor-unified-area.edit-mode {
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-unified-area .note-textarea {
+    flex: 1;
+    width: 100%;
+    padding: var(--space-5);
+    background: transparent;
+    border: none;
+    resize: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: 1.8;
+    color: var(--color-text);
+}
+
+.editor-unified-area .note-textarea:focus {
+    outline: none;
+}
+
+.editor-unified-area .note-preview {
+    padding: var(--space-5);
+    line-height: 1.8;
+}
+
+/* Нижний тулбар форматирования */
+.editor-bottom-toolbar {
+    border-top: 1px solid var(--color-outline-variant);
+    background: var(--color-surface);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: all var(--transition-base);
+}
+
+.editor-bottom-toolbar.collapsed .toolbar-content {
+    display: none;
+}
+
+.toolbar-collapse-btn {
+    width: 100%;
+    padding: var(--space-2);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-tertiary);
+    transition: all var(--transition-fast);
+}
+
+.toolbar-collapse-btn:hover {
+    background: var(--color-surface-container);
+    color: var(--color-text);
+}
+
+.toolbar-collapse-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.toolbar-content {
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.toolbar-content.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.toolbar-group {
+    display: flex;
+    gap: var(--space-1);
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--color-outline-variant);
+    margin: 0 var(--space-2);
+}
+
+.format-btn {
+    padding: var(--space-2);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    transition: all var(--transition-fast);
+    min-width: 32px;
+    height: 32px;
+}
+
+.format-btn:hover:not(:disabled) {
+    background: var(--color-surface-container-high);
+    color: var(--color-text);
+}
+
+.format-btn:active:not(:disabled) {
+    background: var(--color-primary-container);
+    color: var(--color-primary);
+}
+
+.format-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.format-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Статус-бар в нижнем тулбаре */
+.toolbar-status {
+    padding: var(--space-2) var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+.toolbar-status .status-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.toolbar-status .status-item svg {
+    width: 14px;
+    height: 14px;
 }
 
 .editor-header {

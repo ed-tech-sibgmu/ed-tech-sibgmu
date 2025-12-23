@@ -11,6 +11,7 @@ export class NotesPage {
         this.currentNote = null;
         this.currentFolder = null;
         this.isEditing = false;
+        this.toolbarCollapsed = false;
         this.autoSaveTimer = null;
     }
 
@@ -165,32 +166,23 @@ export class NotesPage {
 
     renderEditor() {
         const note = this.currentNote;
+        // isEditing теперь означает режим редактирования (исходный код) vs режим чтения (рендер)
+        const isReadMode = !this.isEditing;
 
         return `
-            <div class="note-editor">
-                <!-- Toolbar -->
-                <div class="editor-toolbar">
+            <div class="note-editor obsidian-style">
+                <!-- Верхний тулбар с названием и действиями -->
+                <div class="editor-header-bar">
                     <input type="text" 
                            class="note-title-input" 
                            id="note-title" 
                            value="${note.title || ''}" 
                            placeholder="Название конспекта">
                     
-                    <div class="toolbar-actions">
-                        <div class="view-toggle">
-                            <button class="toggle-btn ${!this.isEditing ? 'active' : ''}" data-view="preview">
-                                <i data-lucide="eye"></i>
-                            </button>
-                            <button class="toggle-btn ${this.isEditing ? 'active' : ''}" data-view="edit">
-                                <i data-lucide="edit-3"></i>
-                            </button>
-                            <button class="toggle-btn" data-view="split">
-                                <i data-lucide="columns"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="toolbar-divider"></div>
-                        
+                    <div class="header-actions">
+                        <button class="btn-icon mode-toggle ${isReadMode ? 'reading' : 'editing'}" id="toggle-mode" title="${isReadMode ? 'Режим редактирования' : 'Режим чтения'}">
+                            <i data-lucide="${isReadMode ? 'eye' : 'edit-3'}"></i>
+                        </button>
                         <button class="btn-icon" id="export-note" title="Экспорт">
                             <i data-lucide="download"></i>
                         </button>
@@ -200,66 +192,101 @@ export class NotesPage {
                     </div>
                 </div>
                 
-                <!-- Formatting toolbar -->
-                <div class="formatting-toolbar ${this.isEditing ? '' : 'hidden'}">
-                    <button class="format-btn" data-format="bold" title="Жирный (Ctrl+B)">
-                        <i data-lucide="bold"></i>
-                    </button>
-                    <button class="format-btn" data-format="italic" title="Курсив (Ctrl+I)">
-                        <i data-lucide="italic"></i>
-                    </button>
-                    <button class="format-btn" data-format="code" title="Код">
-                        <i data-lucide="code"></i>
-                    </button>
-                    <div class="toolbar-divider"></div>
-                    <button class="format-btn" data-format="h1" title="Заголовок 1">H1</button>
-                    <button class="format-btn" data-format="h2" title="Заголовок 2">H2</button>
-                    <button class="format-btn" data-format="h3" title="Заголовок 3">H3</button>
-                    <div class="toolbar-divider"></div>
-                    <button class="format-btn" data-format="ul" title="Список">
-                        <i data-lucide="list"></i>
-                    </button>
-                    <button class="format-btn" data-format="ol" title="Нумерованный список">
-                        <i data-lucide="list-ordered"></i>
-                    </button>
-                    <button class="format-btn" data-format="quote" title="Цитата">
-                        <i data-lucide="quote"></i>
-                    </button>
-                    <div class="toolbar-divider"></div>
-                    <button class="format-btn" data-format="link" title="Ссылка">
-                        <i data-lucide="link"></i>
-                    </button>
-                    <button class="format-btn" data-format="image" title="Изображение">
-                        <i data-lucide="image"></i>
-                    </button>
-                    <button class="format-btn" data-format="math" title="Формула LaTeX">
-                        <i data-lucide="sigma"></i>
-                    </button>
-                    <button class="format-btn" data-format="callout" title="Callout">
-                        <i data-lucide="message-square"></i>
-                    </button>
+                <!-- Единое поле редактирования/просмотра -->
+                <div class="editor-unified-area ${isReadMode ? 'read-mode' : 'edit-mode'}" id="unified-editor">
+                    ${isReadMode ? `
+                        <div class="note-preview markdown-body" id="note-preview">
+                            ${this.renderMarkdown(note.content || '')}
+                        </div>
+                    ` : `
+                        <textarea id="note-content" 
+                                  class="note-textarea" 
+                                  placeholder="Начните писать в Markdown...">${note.content || ''}</textarea>
+                    `}
                 </div>
                 
-                <!-- Editor/Preview area -->
-                <div class="editor-content" data-view="preview">
-                    <textarea id="note-content" 
-                              class="note-textarea" 
-                              placeholder="Начните писать...">${note.content || ''}</textarea>
-                    <div id="note-preview" class="note-preview markdown-body">
-                        ${this.renderMarkdown(note.content || '')}
+                <!-- Нижний тулбар форматирования (сворачиваемый) -->
+                <div class="editor-bottom-toolbar ${this.toolbarCollapsed ? 'collapsed' : ''}" id="bottom-toolbar">
+                    <button class="toolbar-collapse-btn" id="collapse-toolbar" title="${this.toolbarCollapsed ? 'Развернуть' : 'Свернуть'}">
+                        <i data-lucide="${this.toolbarCollapsed ? 'chevron-up' : 'chevron-down'}"></i>
+                    </button>
+                    
+                    <div class="toolbar-content ${isReadMode ? 'disabled' : ''}">
+                        <div class="toolbar-group">
+                            <button class="format-btn" data-format="bold" title="Жирный (Ctrl+B)" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="bold"></i>
+                            </button>
+                            <button class="format-btn" data-format="italic" title="Курсив (Ctrl+I)" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="italic"></i>
+                            </button>
+                            <button class="format-btn" data-format="strikethrough" title="Зачёркнутый" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="strikethrough"></i>
+                            </button>
+                            <button class="format-btn" data-format="code" title="Код" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="code"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="toolbar-divider"></div>
+                        
+                        <div class="toolbar-group">
+                            <button class="format-btn" data-format="h1" title="Заголовок 1" ${isReadMode ? 'disabled' : ''}>H1</button>
+                            <button class="format-btn" data-format="h2" title="Заголовок 2" ${isReadMode ? 'disabled' : ''}>H2</button>
+                            <button class="format-btn" data-format="h3" title="Заголовок 3" ${isReadMode ? 'disabled' : ''}>H3</button>
+                        </div>
+                        
+                        <div class="toolbar-divider"></div>
+                        
+                        <div class="toolbar-group">
+                            <button class="format-btn" data-format="ul" title="Маркированный список" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="list"></i>
+                            </button>
+                            <button class="format-btn" data-format="ol" title="Нумерованный список" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="list-ordered"></i>
+                            </button>
+                            <button class="format-btn" data-format="checklist" title="Чеклист" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="check-square"></i>
+                            </button>
+                            <button class="format-btn" data-format="quote" title="Цитата" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="quote"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="toolbar-divider"></div>
+                        
+                        <div class="toolbar-group">
+                            <button class="format-btn" data-format="link" title="Ссылка" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="link"></i>
+                            </button>
+                            <button class="format-btn" data-format="image" title="Изображение" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="image"></i>
+                            </button>
+                            <button class="format-btn" data-format="table" title="Таблица" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="table"></i>
+                            </button>
+                            <button class="format-btn" data-format="math" title="Формула LaTeX" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="sigma"></i>
+                            </button>
+                            <button class="format-btn" data-format="callout" title="Callout" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="message-square"></i>
+                            </button>
+                            <button class="format-btn" data-format="codeblock" title="Блок кода" ${isReadMode ? 'disabled' : ''}>
+                                <i data-lucide="file-code"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Status bar -->
-                <div class="editor-status">
-                    <span class="status-item">
-                        <i data-lucide="clock"></i>
-                        ${note.updatedAt ? `Изменён ${this.formatDate(note.updatedAt)}` : 'Новый'}
-                    </span>
-                    <span class="status-item word-count">
-                        <i data-lucide="type"></i>
-                        <span id="word-count">${this.countWords(note.content || '')}</span> слов
-                    </span>
+                    
+                    <!-- Статус-бар внутри нижнего тулбара -->
+                    <div class="toolbar-status">
+                        <span class="status-item">
+                            <i data-lucide="clock"></i>
+                            ${note.updatedAt ? this.formatDate(note.updatedAt) : 'Новый'}
+                        </span>
+                        <span class="status-item">
+                            <i data-lucide="type"></i>
+                            <span id="word-count">${this.countWords(note.content || '')}</span> слов
+                        </span>
+                    </div>
                 </div>
             </div>
         `;
@@ -269,7 +296,7 @@ export class NotesPage {
         return `
             <div class="modal" id="generate-note-modal">
                 <div class="modal-backdrop"></div>
-                <div class="modal-content modal-large">
+                <div class="modal-container modal-large">
                     <div class="modal-header">
                         <h3>Генерация конспекта</h3>
                         <button class="modal-close" data-close="generate-note-modal">
@@ -342,7 +369,7 @@ export class NotesPage {
         return `
             <div class="modal" id="folder-modal">
                 <div class="modal-backdrop"></div>
-                <div class="modal-content modal-small">
+                <div class="modal-container modal-small">
                     <div class="modal-header">
                         <h3>Новая папка</h3>
                         <button class="modal-close" data-close="folder-modal">
@@ -539,8 +566,6 @@ export class NotesPage {
         const contentArea = container.querySelector('#note-content');
         const preview = container.querySelector('#note-preview');
 
-        if (!contentArea) return;
-
         // Автосохранение
         const saveHandler = () => {
             if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
@@ -548,66 +573,74 @@ export class NotesPage {
         };
 
         titleInput?.addEventListener('input', saveHandler);
-        contentArea?.addEventListener('input', () => {
-            saveHandler();
-            // Обновляем превью
-            if (preview) {
-                preview.innerHTML = this.renderMarkdown(contentArea.value);
-            }
-            // Обновляем счётчик слов
-            const wordCount = container.querySelector('#word-count');
-            if (wordCount) {
-                wordCount.textContent = this.countWords(contentArea.value);
-            }
-        });
-
-        // Переключение режимов
-        container.querySelectorAll('.view-toggle .toggle-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const view = btn.dataset.view;
-                container.querySelectorAll('.view-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                const editorContent = container.querySelector('.editor-content');
-                const formattingBar = container.querySelector('.formatting-toolbar');
-
-                editorContent.dataset.view = view;
-                this.isEditing = view === 'edit' || view === 'split';
-                formattingBar?.classList.toggle('hidden', view === 'preview');
-
-                if (view !== 'edit') {
-                    preview.innerHTML = this.renderMarkdown(contentArea.value);
+        
+        // События для режима редактирования
+        if (contentArea) {
+            contentArea.addEventListener('input', () => {
+                saveHandler();
+                // Обновляем счётчик слов
+                const wordCount = container.querySelector('#word-count');
+                if (wordCount) {
+                    wordCount.textContent = this.countWords(contentArea.value);
                 }
             });
+            
+            // Горячие клавиши в редакторе
+            contentArea.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    switch (e.key) {
+                        case 'b':
+                            e.preventDefault();
+                            this.applyFormat('bold', contentArea);
+                            break;
+                        case 'i':
+                            e.preventDefault();
+                            this.applyFormat('italic', contentArea);
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            this.saveCurrentNote();
+                            this.app.toast.success('Сохранено');
+                            break;
+                    }
+                }
+            });
+        }
+
+        // Переключение режима редактирования/чтения
+        container.querySelector('#toggle-mode')?.addEventListener('click', () => {
+            // Сохраняем текущее содержимое перед переключением
+            if (this.isEditing && contentArea) {
+                this.currentNote.content = contentArea.value;
+                this.saveCurrentNote();
+            }
+            this.isEditing = !this.isEditing;
+            this.render(document.getElementById('main-content'));
         });
 
-        // Форматирование
+        // Сворачивание/разворачивание тулбара
+        container.querySelector('#collapse-toolbar')?.addEventListener('click', () => {
+            this.toolbarCollapsed = !this.toolbarCollapsed;
+            const toolbar = container.querySelector('#bottom-toolbar');
+            toolbar?.classList.toggle('collapsed', this.toolbarCollapsed);
+            // Обновляем иконку
+            const icon = container.querySelector('#collapse-toolbar i');
+            if (icon) {
+                icon.setAttribute('data-lucide', this.toolbarCollapsed ? 'chevron-up' : 'chevron-down');
+                lucide.createIcons();
+            }
+        });
+
+        // Форматирование (только в режиме редактирования)
         container.querySelectorAll('.format-btn').forEach(btn => {
             btn.addEventListener('click', () => {
+                if (!this.isEditing) return;
                 const format = btn.dataset.format;
-                this.applyFormat(format, contentArea);
-            });
-        });
-
-        // Горячие клавиши
-        contentArea?.addEventListener('keydown', (e) => {
-            if (e.ctrlKey || e.metaKey) {
-                switch (e.key) {
-                    case 'b':
-                        e.preventDefault();
-                        this.applyFormat('bold', contentArea);
-                        break;
-                    case 'i':
-                        e.preventDefault();
-                        this.applyFormat('italic', contentArea);
-                        break;
-                    case 's':
-                        e.preventDefault();
-                        this.saveCurrentNote();
-                        this.app.toast.success('Сохранено');
-                        break;
+                const textarea = container.querySelector('#note-content');
+                if (textarea) {
+                    this.applyFormat(format, textarea);
                 }
-            }
+            });
         });
 
         // Экспорт
@@ -620,6 +653,12 @@ export class NotesPage {
             if (this.currentNote) {
                 this.deleteNote(this.currentNote.id);
             }
+        });
+        
+        // Двойной клик по превью для входа в режим редактирования
+        container.querySelector('#note-preview')?.addEventListener('dblclick', () => {
+            this.isEditing = true;
+            this.render(document.getElementById('main-content'));
         });
     }
 
@@ -651,17 +690,21 @@ export class NotesPage {
         const formats = {
             bold: { prefix: '**', suffix: '**', placeholder: 'жирный текст' },
             italic: { prefix: '*', suffix: '*', placeholder: 'курсив' },
+            strikethrough: { prefix: '~~', suffix: '~~', placeholder: 'зачёркнутый' },
             code: { prefix: '`', suffix: '`', placeholder: 'код' },
             h1: { prefix: '# ', suffix: '', placeholder: 'Заголовок 1', lineStart: true },
             h2: { prefix: '## ', suffix: '', placeholder: 'Заголовок 2', lineStart: true },
             h3: { prefix: '### ', suffix: '', placeholder: 'Заголовок 3', lineStart: true },
             ul: { prefix: '- ', suffix: '', placeholder: 'элемент списка', lineStart: true },
             ol: { prefix: '1. ', suffix: '', placeholder: 'элемент списка', lineStart: true },
+            checklist: { prefix: '- [ ] ', suffix: '', placeholder: 'задача', lineStart: true },
             quote: { prefix: '> ', suffix: '', placeholder: 'цитата', lineStart: true },
             link: { prefix: '[', suffix: '](url)', placeholder: 'текст ссылки' },
             image: { prefix: '![', suffix: '](url)', placeholder: 'alt текст' },
             math: { prefix: '$', suffix: '$', placeholder: 'формула' },
-            callout: { prefix: '> [!note] ', suffix: '\n> ', placeholder: 'Заголовок\n> Содержимое', lineStart: true }
+            callout: { prefix: '> [!note] ', suffix: '\n> ', placeholder: 'Заголовок\n> Содержимое', lineStart: true },
+            table: { prefix: '| Заголовок 1 | Заголовок 2 |\n|-------------|-------------|\n| ', suffix: ' | Данные 2 |', placeholder: 'Данные 1', lineStart: true },
+            codeblock: { prefix: '```\n', suffix: '\n```', placeholder: 'код', lineStart: true }
         };
 
         const fmt = formats[format];
@@ -728,6 +771,7 @@ export class NotesPage {
         const contentArea = document.getElementById('note-content');
 
         if (titleInput) this.currentNote.title = titleInput.value;
+        // Сохраняем содержимое только если редактор доступен (режим редактирования)
         if (contentArea) this.currentNote.content = contentArea.value;
         this.currentNote.updatedAt = new Date().toISOString();
 
@@ -840,7 +884,7 @@ export class NotesPage {
             return;
         }
 
-        const apiKey = this.app.storage.get('anthropic_api_key');
+        const apiKey = "${secrets.HUGGING_FACE_TOKEN}";
         if (!apiKey) {
             this.app.toast.error('Добавьте API ключ Anthropic в настройках');
             return;
@@ -855,7 +899,7 @@ export class NotesPage {
 
         try {
             const profile = this.app.storage.get('user_profile') || {};
-            const content = await this.callClaudeAPI(apiKey, topic, size, instructions, profile);
+            const content = await this.callAI(apiKey, topic, size, instructions, profile);
 
             // Создаём новую заметку
             const note = {
@@ -888,7 +932,7 @@ export class NotesPage {
         }
     }
 
-    async callClaudeAPI(apiKey, topic, size, instructions, profile) {
+    async callAI(apiKey, topic, size, instructions, profile) {
         const sizeTokens = {
             brief: 2000,
             medium: 8000,
@@ -898,22 +942,17 @@ export class NotesPage {
         const systemPrompt = this.buildSystemPrompt(profile);
         const userPrompt = this.buildUserPrompt(topic, size, instructions);
 
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
+        const response = await fetch('https://router.huggingface.co/v1/chat/completions', {
             method: 'POST',
-            headers: {
+            headers: { 
                 'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01',
-                'anthropic-dangerous-direct-browser-access': 'true'
+            	Authorization: 'Bearer ${secrets.HUGGING_FACE_TOKEN}',
             },
             body: JSON.stringify({
-                model: 'claude-sonnet-4-20250514',
-                max_tokens: sizeTokens[size] || 8000,
-                system: systemPrompt,
-                messages: [
-                    { role: 'user', content: userPrompt }
-                ]
-            })
+                "system": systemPrompt,
+                "messages":[{"role":"user","content": userPrompt}],
+                "model":"deepseek-ai/DeepSeek-V3.2"})
+
         });
 
         if (!response.ok) {

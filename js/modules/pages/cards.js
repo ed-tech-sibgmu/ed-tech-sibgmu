@@ -477,7 +477,7 @@ export class CardsPage {
         return `
             <div class="modal" id="create-deck-modal">
                 <div class="modal-backdrop"></div>
-                <div class="modal-content">
+                <div class="modal-container">
                     <div class="modal-header">
                         <h3>Новая колода</h3>
                         <button class="modal-close" data-close="create-deck-modal">
@@ -520,7 +520,7 @@ export class CardsPage {
         return `
             <div class="modal" id="generate-cards-modal">
                 <div class="modal-backdrop"></div>
-                <div class="modal-content modal-large">
+                <div class="modal-container modal-large">
                     <div class="modal-header">
                         <h3>Генерация карточек</h3>
                         <button class="modal-close" data-close="generate-cards-modal">
@@ -579,7 +579,7 @@ export class CardsPage {
         return `
             <div class="modal" id="edit-card-modal">
                 <div class="modal-backdrop"></div>
-                <div class="modal-content">
+                <div class="modal-container">
                     <div class="modal-header">
                         <h3>Редактировать карточку</h3>
                         <button class="modal-close" data-close="edit-card-modal">
