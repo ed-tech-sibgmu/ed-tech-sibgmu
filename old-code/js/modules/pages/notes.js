@@ -840,7 +840,7 @@ export class NotesPage {
             return;
         }
 
-        const apiKey = "${secrets.HUGGING_FACE_TOKEN}";
+        const apiKey = "${HUGGING_FACE_TOKEN}";
         if (!apiKey) {
             this.app.toast.error('Добавьте API ключ Anthropic в настройках');
             return;
@@ -902,7 +902,7 @@ export class NotesPage {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-            	Authorization: 'Bearer ${secrets.HUGGING_FACE_TOKEN}',
+            	Authorization: 'Bearer ${HUGGING_FACE_TOKEN}',
             },
             body: JSON.stringify({
                 "system": systemPrompt,
